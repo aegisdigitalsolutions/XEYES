@@ -60,8 +60,21 @@ class ZipExportSink(target: OutputStream) : ExportSink {
     }
 
     private companion object {
-        /** 1980-01-01T00:00:00Z, the earliest timestamp the zip format can represent. */
-        const val FIXED_ENTRY_TIME_MILLIS = 315_532_800_000L
+        /**
+         * The epoch, which every zone clamps to the same DOS timestamp.
+         *
+         * Zip stores modification times as *local* DOS time, so [ZipEntry.setTime] converts
+         * through the JVM's default zone. Handing it 1980-01-01T00:00:00Z — the earliest instant
+         * DOS time can represent — is therefore not reproducible: east of UTC it lands on a
+         * representable local time and is stored verbatim, while west of UTC it falls below the
+         * format's floor and is clamped. The same rows exported in Tokyo and in London would
+         * differ in bytes without differing in content.
+         *
+         * Any instant far enough below the 1980 floor is clamped in every zone, including +14:00,
+         * so the archive carries the format's minimum timestamp regardless of where the device is
+         * or whether it has since moved.
+         */
+        const val FIXED_ENTRY_TIME_MILLIS = 0L
     }
 }
 
