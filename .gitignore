@@ -25,6 +25,14 @@ htmlcov/
 /out/
 *.zip
 
+# The cross-language fixtures are the exception, and have to be: they are how the Kotlin apps and
+# the Python Lab agree on a file format without ever sharing a process. Synthetic throughout — a
+# fabricated site, fabricated devices, fabricated radio — so nothing real is committed here.
+!/contract/*.zip
+
+# Kotlin compiler daemon session files
+.kotlin/
+
 # Editors
 .idea/
 *.iml

@@ -28,6 +28,15 @@ kotlin {
     jvmToolchain(17)
 }
 
+// The cross-language fixtures under `contract/` are golden files: normally compared, rewritten only
+// when asked. Forwarded explicitly because a Gradle test worker is a separate JVM and does not
+// inherit the build's system properties.
+tasks.withType<Test>().configureEach {
+    System.getProperty("rfmapper.contract.write")?.let {
+        systemProperty("rfmapper.contract.write", it)
+    }
+}
+
 // The generated schema JSON is committed. A schema change that its author forgot to write a
 // migration for then fails the build, rather than failing on a field engineer's phone with a day
 // of unrecoverable observations inside the old database.

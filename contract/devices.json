@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "registry-contract-2026-05-04",
+  "created_at": "2026-05-04T12:00:00.000Z",
+  "notes": "Cross-language contract fixture.",
+  "managed_devices": [
+    {
+      "device_id": "DEVICE-RETIRED-1",
+      "friendly_name": "Withdrawn handset",
+      "device_type": "PHONE",
+      "status": "BLOCKED",
+      "known_wifi_identifiers": [
+        "ee:ff:00:11:22:33"
+      ],
+      "known_ble_identifiers": [],
+      "known_service_uuids": [],
+      "notes": null,
+      "first_seen": null,
+      "last_seen": null
+    },
+    {
+      "device_id": "DEVICE-TAG-1",
+      "friendly_name": "Toolbox tag",
+      "device_type": "BLE_TAG",
+      "status": "AUTHORIZED",
+      "known_wifi_identifiers": [],
+      "known_ble_identifiers": [
+        "d0:d0:d0:00:00:0a"
+      ],
+      "known_service_uuids": [
+        "6b1a7e10-3c4d-4f5a-9b8c-1d2e3f405162"
+      ],
+      "notes": "Service UUID is the durable identifier; the MAC may rotate.",
+      "first_seen": null,
+      "last_seen": null
+    }
+  ]
+}
