@@ -97,6 +97,9 @@ class PipelineResult:
     dataset: Dataset
     oscillations: int = 0
     topology_violations: int = 0
+    withheld_transitions: int = 0
+    withheld_by_gate: dict[str, int] = field(default_factory=dict)
+    peak_withheld_confidence: float | None = None
 
     @property
     def flags(self) -> tuple[QualityFlag, ...]:
@@ -151,6 +154,9 @@ def run_pipeline(dataset: Dataset, config: PipelineConfig = PipelineConfig()) ->
     movements: list[MovementEstimate] = []
     oscillations = 0
     violations = 0
+    withheld = 0
+    withheld_gates: dict[str, int] = {}
+    peak_withheld: float | None = None
     movement_engine = MovementEngineV1()
 
     for device_id in sorted(by_device):
@@ -189,6 +195,15 @@ def run_pipeline(dataset: Dataset, config: PipelineConfig = PipelineConfig()) ->
         movements.extend(result.movements)
         oscillations += result.oscillations
         violations += result.topology_violations
+        withheld += result.withheld
+        for gate, count in result.withheld_by_gate.items():
+            withheld_gates[gate] = withheld_gates.get(gate, 0) + count
+        if result.peak_withheld_confidence is not None:
+            peak_withheld = (
+                result.peak_withheld_confidence
+                if peak_withheld is None
+                else max(peak_withheld, result.peak_withheld_confidence)
+            )
 
     return PipelineResult(
         estimates=tuple(sorted(estimates, key=lambda e: (e.timestamp_utc, e.estimate_id))),
@@ -202,6 +217,9 @@ def run_pipeline(dataset: Dataset, config: PipelineConfig = PipelineConfig()) ->
         dataset=dataset,
         oscillations=oscillations,
         topology_violations=violations,
+        withheld_transitions=withheld,
+        withheld_by_gate=dict(sorted(withheld_gates.items())),
+        peak_withheld_confidence=peak_withheld,
     )
 
 

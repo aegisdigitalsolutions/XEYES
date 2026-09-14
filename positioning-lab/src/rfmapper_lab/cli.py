@@ -208,6 +208,7 @@ def _run(args: argparse.Namespace) -> int:
         print(f"  {name}: {count}")
     print(f"  tiers: {result.tier_breakdown()}")
     print(f"  methods: {result.method_breakdown()}")
+    _print_withheld(result, config)
     if not config.empirical.validated:
         print(
             "\nUncertainty is unvalidated: every coordinate carries UNVALIDATED_UNCERTAINTY. Run "
@@ -513,6 +514,31 @@ def _write_empirical_error_model(report, out: Path) -> None:
         print(
             f"  measured on {model.dataset_kind} data, so estimates using it stay flagged "
             f"UNVALIDATED_UNCERTAINTY"
+        )
+
+
+def _print_withheld(result, config) -> None:
+    """Say when zone changes were seen and not recorded, and what stopped them.
+
+    An empty movement history reads as "nothing moved", and on a site whose evidence produces
+    lower confidence than the hysteresis thresholds were set for it can instead mean "everything
+    moved and nothing was recorded". The two need to be distinguishable without reading the code.
+    """
+    if not result.withheld_transitions:
+        return
+
+    gates = ", ".join(f"{gate} ({count})" for gate, count in result.withheld_by_gate.items())
+    print(
+        f"\n{result.withheld_transitions} observed zone change(s) were not committed as "
+        f"transitions. Gate(s) that stopped them: {gates}."
+    )
+    if "confidence" in result.withheld_by_gate and result.peak_withheld_confidence is not None:
+        movement = config.params.movement
+        print(
+            f"  Highest confidence reached was {result.peak_withheld_confidence:.3f} against a "
+            f"min_transition_confidence of {movement.min_transition_confidence:g}. That threshold "
+            f"is an unvalidated placeholder; `rfmapper-lab demo` sweeps it against a known route, "
+            f"and it should be set from a walk test on this site rather than guessed."
         )
 
 
