@@ -86,7 +86,10 @@ def write_derived_package(
         ),
         (MOVEMENTS_JSON, encode([movement_to_dict(m) for m in result.movements])),
         (QUALITY_JSON, encode(result.quality.as_dict())),
-        (ALGORITHM_JSON, encode(clean(algorithm_report or _minimal_algorithm_report(result)))),
+        (
+            ALGORITHM_JSON,
+            encode(clean(_auditable(algorithm_report) or _minimal_algorithm_report(result))),
+        ),
     ]
 
     digests = {name: sha256_hex(payload) for name, payload in entries}
@@ -106,6 +109,36 @@ def write_derived_package(
         entry_digests=digests,
         counts=result.counts(),
     )
+
+
+#: Benchmark fields that measure the host rather than the data. They belong in the standalone
+#: ``algorithm_report.json`` the ``benchmark`` command writes, where someone is weighing the cost of
+#: two engines against each other on one machine.
+MACHINE_MEASURED_FIELDS = frozenset({"median_cpu_ms"})
+
+
+def _auditable(report: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Drop the host-dependent timings from the report before it is sealed into the package.
+
+    ``docs/13`` §5 wants this entry to record what was measured, on what data, with which split —
+    all of which are functions of the inputs. A median CPU time is not: it differs by a few percent
+    between runs, and leaving it in would change the package checksum on every regeneration, which
+    is exactly the signal ``checksum.txt`` exists to give. A derived package should differ when a
+    conclusion differs, not when the machine was busier.
+    """
+    if report is None:
+        return None
+    candidates = report.get("candidates")
+    if not isinstance(candidates, list):
+        return report
+    return report | {
+        "candidates": [
+            {key: value for key, value in candidate.items() if key not in MACHINE_MEASURED_FIELDS}
+            if isinstance(candidate, dict)
+            else candidate
+            for candidate in candidates
+        ]
+    }
 
 
 def _manifest(result: PipelineResult, stamp: str) -> dict[str, Any]:

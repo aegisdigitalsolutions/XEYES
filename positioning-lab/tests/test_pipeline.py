@@ -270,6 +270,37 @@ class TestDerivedPackage:
         assert "No held-out accuracy was measured" in report["accuracy_claim"]
         assert report["parameter_set"]["zone"]["mismatch_penalty"] == DEFAULTS.zone.mismatch_penalty
 
+    def test_an_embedded_benchmark_report_carries_no_host_dependent_timing(self, run, tmp_path):
+        """A median CPU time differs between runs on the same data, and sealing one into the
+        package would change its checksum for a reason that has nothing to do with a conclusion.
+        The timing stays in the standalone report the ``benchmark`` command writes.
+        """
+        report = {
+            "report_id": "r-1",
+            "selected": "zone_bayes_v1",
+            "candidates": [
+                {"label": "zone_bayes_v1", "median_cpu_ms": 1.9268, "classification": {}},
+                {"label": "zone_nn_v1", "median_cpu_ms": 1.7562, "classification": {}},
+            ],
+        }
+        slower = {
+            **report,
+            "candidates": [
+                {**candidate, "median_cpu_ms": candidate["median_cpu_ms"] + 0.5}
+                for candidate in report["candidates"]
+            ],
+        }
+
+        first = write_derived_package(run, tmp_path / "a", algorithm_report=report)
+        second = write_derived_package(run, tmp_path / "b", algorithm_report=slower)
+
+        with zipfile.ZipFile(first.path) as archive:
+            embedded = json.loads(archive.read("algorithm_report.json"))
+        assert [c["label"] for c in embedded["candidates"]] == ["zone_bayes_v1", "zone_nn_v1"]
+        assert all("median_cpu_ms" not in candidate for candidate in embedded["candidates"])
+        assert embedded["selected"] == "zone_bayes_v1"
+        assert first.package_sha256 == second.package_sha256
+
     def test_the_quality_report_travels_with_the_package(self, run, tmp_path):
         package = write_derived_package(run, tmp_path)
         with zipfile.ZipFile(package.path) as archive:

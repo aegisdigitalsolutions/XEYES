@@ -27,7 +27,7 @@ from rfmapper_lab.benchmark import (
     run_benchmark,
 )
 from rfmapper_lab.benchmark.baseline import TARGET_CONTAINMENT, check
-from rfmapper_lab.benchmark.harness import select
+from rfmapper_lab.benchmark.harness import COST_MARGIN, select
 from rfmapper_lab.benchmark.metrics import (
     Interval,
     Record,
@@ -358,7 +358,36 @@ class TestSelection:
 
         assert winner == "cheap"
         assert "not significantly better" in reason
-        assert "10.0x" in reason
+        assert f"at least {COST_MARGIN:g}x the cost" in reason
+
+    def test_costs_within_the_measurement_noise_do_not_decide_the_winner(self):
+        """Otherwise whatever else the host was doing picks the algorithm a site runs, and two
+        runs over identical inputs disagree about the answer.
+        """
+        quick = self._result("b_measured_quicker", 0.81, cpu_ms=1.00)
+        slow = self._result("a_measured_slower", 0.80, cpu_ms=1.04)
+
+        winner, reason = select((quick, slow))
+        rerun, _ = select(
+            (
+                replace(quick, cpu_ms=1.03),
+                replace(slow, cpu_ms=1.01),
+            )
+        )
+
+        # Resolved by label, so the margin between them is irrelevant and the answer is stable.
+        assert winner == rerun == "a_measured_slower"
+        assert "no cheaper than it beyond measurement noise" in reason
+        assert f"{COST_MARGIN:g}x" not in reason, "it won on name order, not on cost"
+
+    def test_an_unmeasured_cost_is_not_read_as_an_expensive_one(self):
+        """Excluding it would be a claim about a measurement that was never taken."""
+        unmeasured = self._result("a_unmeasured", 0.80, cpu_ms=None)
+        measured = self._result("b_measured", 0.81, cpu_ms=1.0)
+
+        winner, _ = select((unmeasured, measured))
+
+        assert winner == "a_unmeasured"
 
     def test_a_clearly_better_candidate_wins(self):
         strong = self._result("strong", 0.95, cpu_ms=10.0, width=0.01)

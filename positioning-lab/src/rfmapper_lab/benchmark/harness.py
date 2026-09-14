@@ -351,10 +351,12 @@ def select(results: Sequence[CandidateResult]) -> tuple[str | None, str]:
     ]
     pool = honest or scored
 
-    def key(result: CandidateResult) -> tuple[float, float]:
+    def key(result: CandidateResult) -> tuple[float, str]:
         interval = result.intervals.get("zone_accuracy")
         point = interval.point if interval else result.classification.zone_accuracy
-        return (-point, result.cpu_ms or 0.0)
+        # An accuracy tie breaks on the label, not on measured time. Cost enters below, where a
+        # material difference can be told apart from a noisy one; see COST_MARGIN.
+        return (-point, result.candidate.label)
 
     ranked = sorted(pool, key=key)
     leader = ranked[0]
@@ -391,17 +393,26 @@ def select(results: Sequence[CandidateResult]) -> tuple[str | None, str]:
         if overlapping:
             # Cheapest among the statistically indistinguishable. Cost is the tiebreak because a
             # nightly batch over a full day of history pays it on every row.
-            tied = sorted([leader, *overlapping], key=lambda r: (r.cpu_ms or 0.0, r.candidate.label))
-            winner = tied[0]
+            winner = _cheapest([leader, *overlapping])
             if winner is not leader:
-                reason_parts.append(
-                    f"{leader.candidate.label} not significantly better than "
-                    f"{winner.candidate.label} at "
-                    f"{_cost_ratio(leader, winner)} the cost; intervals overlap"
-                )
+                if _materially_cheaper(winner, leader):
+                    reason_parts.append(
+                        f"{leader.candidate.label} not significantly better than "
+                        f"{winner.candidate.label} and at least {COST_MARGIN:g}x the cost; "
+                        "intervals overlap"
+                    )
+                else:
+                    # Saying "cheaper" here would credit a difference of a few percent between two
+                    # timings of the same machine. It won on name order, and the reason says so.
+                    reason_parts.append(
+                        f"{leader.candidate.label} not significantly better than "
+                        f"{winner.candidate.label} and no cheaper than it beyond measurement "
+                        "noise, so the tie went to the first by name; intervals overlap"
+                    )
                 return winner.candidate.label, "; ".join(reason_parts)
             reason_parts.append(
-                "highest zone accuracy and cheapest among the candidates whose intervals overlap"
+                "highest zone accuracy, and no candidate whose interval overlaps it is materially "
+                "cheaper"
             )
             return leader.candidate.label, "; ".join(reason_parts)
 
@@ -409,10 +420,37 @@ def select(results: Sequence[CandidateResult]) -> tuple[str | None, str]:
     return leader.candidate.label, "; ".join(reason_parts)
 
 
-def _cost_ratio(expensive: CandidateResult, cheap: CandidateResult) -> str:
+#: How much cheaper a candidate has to measure before cost is allowed to decide between two
+#: statistically indistinguishable ones. Median CPU time measures the machine as much as the method:
+#: successive runs of the same benchmark differ by a few percent, so a bare ``min(cpu_ms)`` tiebreak
+#: would let whatever else the host was doing choose which algorithm a site runs, and two runs over
+#: identical inputs could then disagree about the answer. ``docs/12`` §2.6 is concerned with cost at
+#: the "50x for 5% accuracy" scale, which this sits far below while staying well clear of the noise.
+COST_MARGIN = 1.5
+
+
+def _materially_cheaper(cheap: CandidateResult, expensive: CandidateResult) -> bool:
     if not cheap.cpu_ms or not expensive.cpu_ms:
-        return "an unmeasured multiple of"
-    return f"{expensive.cpu_ms / cheap.cpu_ms:.1f}x"
+        return False
+    return expensive.cpu_ms > cheap.cpu_ms * COST_MARGIN
+
+
+def _cheapest(results: Sequence[CandidateResult]) -> CandidateResult:
+    """The cheapest of a set of candidates that could not be separated on accuracy.
+
+    Cheapest by a margin wide enough to survive a re-run: anything within :data:`COST_MARGIN` of the
+    best measurement counts as costing the same and is resolved by label, so the choice is
+    reproducible rather than a record of machine load. A candidate whose cost was never measured is
+    not excluded, because excluding it would be a claim about a measurement that does not exist.
+    """
+    measured = [result.cpu_ms for result in results if result.cpu_ms]
+    by_label = sorted(results, key=lambda result: result.candidate.label)
+    if not measured:
+        return by_label[0]
+    affordable = min(measured) * COST_MARGIN
+    return next(
+        result for result in by_label if not result.cpu_ms or result.cpu_ms <= affordable
+    )
 
 
 def with_movement(report: BenchmarkReport, movement: dict[str, object]) -> BenchmarkReport:
