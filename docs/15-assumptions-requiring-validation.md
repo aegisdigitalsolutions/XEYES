@@ -65,10 +65,20 @@ All parameter defaults below are placeholders. Each needs a tuning run on the VA
 | D10 | Survey duration | 60 s | From the specification | `UNVALIDATED` |
 | D11 | Sessions required to promote a fingerprint | 3 | Judgement | `UNVALIDATED` |
 | D12 | Log-distance exponent $n$ (if RSSI ranging is ever enabled) | **none** | Deliberately absent; must be site-measured | `UNVALIDATED` |
+| D13 | Confidence factors are neutral for an association-only vector (`observer_count`, `calibration_density`) | neutral | Reasoned, not measured: a device holds one association at a time, so corroboration is unobtainable rather than absent, and no fingerprint stands behind the zone | `UNVALIDATED` |
+| D14 | Hysteresis $C_{min}$ for an association-only site | **none fit for purpose** | The 0.6 of D5 was chosen for multi-observer fingerprinting and this evidence does not reach it; see [`19`](19-association-only-deployment.md) §4 | `UNVALIDATED` |
 
 D12 is intentionally left with no default. Shipping a default path-loss exponent would invite its use,
 and an uncalibrated indoor path-loss model is exactly the fabricated-precision failure both
 specifications prohibit. The feature stays disabled until $n$ is measured on site.
+
+D13 corrects a category error rather than tuning a number: the two factors were measuring
+properties that association evidence cannot exhibit, in the way `rtt_quality` is already neutral
+for a method that never claimed a range. That the correction is the right *shape* does not make the
+resulting confidences calibrated, which is why it is listed here. D14 is the consequence — the
+resulting values still sit below D5, so such a site records which tower each device is on and no
+movement between towers until $C_{min}$ is set from a walk test. The run reports the shortfall and
+the highest confidence reached instead of failing silently.
 
 ## E. Achievable accuracy — explicitly unknown
 
@@ -80,6 +90,12 @@ specifications prohibit. The feature stays disabled until $n$ is measured on sit
 | E4 | P90 horizontal error ≲ 20 m | `UNVALIDATED` |
 | E5 | Transition-detection latency ≲ 60 s | `UNVALIDATED` |
 | E6 | False transition rate ≲ 1/hour/device | `UNVALIDATED` |
+| E7 | Tower attribution correctness on an association-only site | `UNVALIDATED` |
+
+E3 and E4 do not apply to an association-only deployment at all: it emits no coordinates, so there
+is no horizontal error to measure. E7 is its equivalent and is a classification question — how often
+the named tower is the right one — measurable from a walk test recording which tower a device was
+genuinely nearest, without a survey.
 
 **These are targets, not claims.** The numbers in the specification's illustrative examples
 ("Confidence 87%", "±8 m", "median 6.2 m") are *format* examples showing how to report results, not

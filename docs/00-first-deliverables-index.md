@@ -41,6 +41,7 @@ this repository.
 | [`16-export-package-specification.md`](16-export-package-specification.md) | The observation package format shared by Collector, Master and Lab |
 | [`17-identity-and-attribution-policy.md`](17-identity-and-attribution-policy.md) | The rules that stop randomized identifiers becoming people |
 | [`18-site-model-specification.md`](18-site-model-specification.md) | Buildings, zones, anchors, survey points, site topology graph |
+| [`19-association-only-deployment.md`](19-association-only-deployment.md) | The no-survey deployment: APs on towers, association reports, tower-level answers |
 
 ## Standing principles
 
