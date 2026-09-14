@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      A bare no-action-bar theme. All visual design is in Compose (RFMapperTheme); this exists only
+      so the activity has a valid window background before the first composition.
+    -->
+    <style name="Theme.RFMapperCollector" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

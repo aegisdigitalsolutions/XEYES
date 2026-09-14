@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rfmapper-lab"
+version = "1.0.0"
+description = "RFMapper Positioning & Fusion Lab: offline inference over exported wireless observations"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+
+# Deliberately a short list. Every dependency here is permissively licensed (BSD-3 or Apache-2.0)
+# and none of them are runtime services: the Lab reads files, computes, and writes files.
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scipy>=1.11",
+    "scikit-learn>=1.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "jsonschema>=4.21"]
+
+[project.scripts]
+rfmapper-lab = "rfmapper_lab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error::RuntimeWarning"]

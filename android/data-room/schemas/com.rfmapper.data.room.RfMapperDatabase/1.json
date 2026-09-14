@@ -1,0 +1,2180 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "ea37d0672b0e87b3c7796fad50b0f756",
+    "entities": [
+      {
+        "tableName": "raw_observation",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`observation_id` TEXT NOT NULL, `schema_version` TEXT NOT NULL, `timestamp_utc` TEXT NOT NULL, `timestamp_epoch_ms` INTEGER NOT NULL, `observer_id` TEXT NOT NULL, `observer_device_type` TEXT NOT NULL, `sensor_type` TEXT NOT NULL, `target_device_id` TEXT, `radio_identifier` TEXT NOT NULL, `identifier_type` TEXT NOT NULL, `ssid` TEXT, `bssid` TEXT, `ble_service_uuid` TEXT, `manufacturer_data` TEXT, `rssi` INTEGER, `tx_power` INTEGER, `frequency` INTEGER, `channel` INTEGER, `rtt_distance_mm` INTEGER, `rtt_stddev_mm` INTEGER, `latitude` REAL, `longitude` REAL, `horizontal_accuracy` REAL, `building_id` TEXT, `zone_id` TEXT, `x_coordinate` REAL, `y_coordinate` REAL, `confidence` REAL, `metadata` TEXT NOT NULL, `session_id` TEXT, `sample_kind` TEXT NOT NULL, `survey_point_id` TEXT, `import_batch_id` TEXT, PRIMARY KEY(`observation_id`))",
+        "fields": [
+          {
+            "fieldPath": "observationId",
+            "columnName": "observation_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "schemaVersion",
+            "columnName": "schema_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampUtc",
+            "columnName": "timestamp_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampEpochMs",
+            "columnName": "timestamp_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observerId",
+            "columnName": "observer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observerDeviceType",
+            "columnName": "observer_device_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sensorType",
+            "columnName": "sensor_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetDeviceId",
+            "columnName": "target_device_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "radioIdentifier",
+            "columnName": "radio_identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "identifierType",
+            "columnName": "identifier_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ssid",
+            "columnName": "ssid",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bssid",
+            "columnName": "bssid",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bleServiceUuid",
+            "columnName": "ble_service_uuid",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "manufacturerData",
+            "columnName": "manufacturer_data",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rssi",
+            "columnName": "rssi",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "txPower",
+            "columnName": "tx_power",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "channel",
+            "columnName": "channel",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rttDistanceMm",
+            "columnName": "rtt_distance_mm",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rttStddevMm",
+            "columnName": "rtt_stddev_mm",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "horizontalAccuracy",
+            "columnName": "horizontal_accuracy",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "xCoordinate",
+            "columnName": "x_coordinate",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "yCoordinate",
+            "columnName": "y_coordinate",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "confidence",
+            "columnName": "confidence",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "metadata",
+            "columnName": "metadata",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sampleKind",
+            "columnName": "sample_kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surveyPointId",
+            "columnName": "survey_point_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "importBatchId",
+            "columnName": "import_batch_id",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "observation_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_raw_observation_timestamp_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "timestamp_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_observation_timestamp_epoch_ms` ON `${TABLE_NAME}` (`timestamp_epoch_ms`)"
+          },
+          {
+            "name": "index_raw_observation_observer_id_timestamp_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "observer_id",
+              "timestamp_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_observation_observer_id_timestamp_epoch_ms` ON `${TABLE_NAME}` (`observer_id`, `timestamp_epoch_ms`)"
+          },
+          {
+            "name": "index_raw_observation_radio_identifier_timestamp_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "radio_identifier",
+              "timestamp_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_observation_radio_identifier_timestamp_epoch_ms` ON `${TABLE_NAME}` (`radio_identifier`, `timestamp_epoch_ms`)"
+          },
+          {
+            "name": "index_raw_observation_target_device_id_timestamp_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "target_device_id",
+              "timestamp_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_observation_target_device_id_timestamp_epoch_ms` ON `${TABLE_NAME}` (`target_device_id`, `timestamp_epoch_ms`)"
+          },
+          {
+            "name": "index_raw_observation_sensor_type_timestamp_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "sensor_type",
+              "timestamp_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_observation_sensor_type_timestamp_epoch_ms` ON `${TABLE_NAME}` (`sensor_type`, `timestamp_epoch_ms`)"
+          },
+          {
+            "name": "index_raw_observation_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_observation_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          },
+          {
+            "name": "index_raw_observation_sample_kind",
+            "unique": false,
+            "columnNames": [
+              "sample_kind"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_observation_sample_kind` ON `${TABLE_NAME}` (`sample_kind`)"
+          },
+          {
+            "name": "index_raw_observation_import_batch_id",
+            "unique": false,
+            "columnNames": [
+              "import_batch_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_observation_import_batch_id` ON `${TABLE_NAME}` (`import_batch_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "raw_session",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` TEXT NOT NULL, `started_at_utc` TEXT NOT NULL, `started_at_epoch_ms` INTEGER NOT NULL, `ended_at_utc` TEXT, `observer_id` TEXT NOT NULL, `scan_profile` TEXT NOT NULL, `building_id` TEXT, `zone_id` TEXT, `observation_count` INTEGER NOT NULL, `wifi_count` INTEGER NOT NULL, `ble_count` INTEGER NOT NULL, `rtt_count` INTEGER NOT NULL, `gps_count` INTEGER NOT NULL, `dropped_samples` INTEGER NOT NULL, `throttled_scan_requests` INTEGER NOT NULL, `background_denied` INTEGER NOT NULL, `suspected_service_kill` INTEGER NOT NULL, `battery_start_pct` INTEGER, `battery_end_pct` INTEGER, `degradations` TEXT NOT NULL, PRIMARY KEY(`session_id`))",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtUtc",
+            "columnName": "started_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtEpochMs",
+            "columnName": "started_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAtUtc",
+            "columnName": "ended_at_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerId",
+            "columnName": "observer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scanProfile",
+            "columnName": "scan_profile",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observationCount",
+            "columnName": "observation_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wifiCount",
+            "columnName": "wifi_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bleCount",
+            "columnName": "ble_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rttCount",
+            "columnName": "rtt_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gpsCount",
+            "columnName": "gps_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "droppedSamples",
+            "columnName": "dropped_samples",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "throttledScanRequests",
+            "columnName": "throttled_scan_requests",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "backgroundDenied",
+            "columnName": "background_denied",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "suspectedServiceKill",
+            "columnName": "suspected_service_kill",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batteryStartPct",
+            "columnName": "battery_start_pct",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "batteryEndPct",
+            "columnName": "battery_end_pct",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "degradations",
+            "columnName": "degradations",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_raw_session_started_at_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "started_at_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_session_started_at_epoch_ms` ON `${TABLE_NAME}` (`started_at_epoch_ms`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "raw_import_batch",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`import_batch_id` TEXT NOT NULL, `observer_id` TEXT NOT NULL, `package_name` TEXT NOT NULL, `package_sha256` TEXT NOT NULL, `imported_at_utc` TEXT NOT NULL, `schema_version` TEXT NOT NULL, `declared_count` INTEGER NOT NULL, `accepted_count` INTEGER NOT NULL, `duplicate_count` INTEGER NOT NULL, `invalid_count` INTEGER NOT NULL, `manifest_json` TEXT NOT NULL, `issues_json` TEXT, `operator` TEXT, `status` TEXT NOT NULL, PRIMARY KEY(`import_batch_id`))",
+        "fields": [
+          {
+            "fieldPath": "importBatchId",
+            "columnName": "import_batch_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observerId",
+            "columnName": "observer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageSha256",
+            "columnName": "package_sha256",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "importedAtUtc",
+            "columnName": "imported_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "schemaVersion",
+            "columnName": "schema_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "declaredCount",
+            "columnName": "declared_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "acceptedCount",
+            "columnName": "accepted_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duplicateCount",
+            "columnName": "duplicate_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "invalidCount",
+            "columnName": "invalid_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "manifestJson",
+            "columnName": "manifest_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "issuesJson",
+            "columnName": "issues_json",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "operator",
+            "columnName": "operator",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "import_batch_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_raw_import_batch_package_sha256",
+            "unique": true,
+            "columnNames": [
+              "package_sha256"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_raw_import_batch_package_sha256` ON `${TABLE_NAME}` (`package_sha256`)"
+          },
+          {
+            "name": "index_raw_import_batch_observer_id",
+            "unique": false,
+            "columnNames": [
+              "observer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_import_batch_observer_id` ON `${TABLE_NAME}` (`observer_id`)"
+          },
+          {
+            "name": "index_raw_import_batch_imported_at_utc",
+            "unique": false,
+            "columnNames": [
+              "imported_at_utc"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_raw_import_batch_imported_at_utc` ON `${TABLE_NAME}` (`imported_at_utc`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_managed_device",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`device_id` TEXT NOT NULL, `friendly_name` TEXT NOT NULL, `device_type` TEXT NOT NULL, `status` TEXT NOT NULL, `notes` TEXT, `first_seen_utc` TEXT, `last_seen_utc` TEXT, `created_at_utc` TEXT NOT NULL, `updated_at_utc` TEXT NOT NULL, PRIMARY KEY(`device_id`))",
+        "fields": [
+          {
+            "fieldPath": "deviceId",
+            "columnName": "device_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "friendlyName",
+            "columnName": "friendly_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "firstSeenUtc",
+            "columnName": "first_seen_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastSeenUtc",
+            "columnName": "last_seen_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAtUtc",
+            "columnName": "created_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAtUtc",
+            "columnName": "updated_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "device_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_device_identifier",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`identifier` TEXT NOT NULL, `identifier_type` TEXT NOT NULL, `device_id` TEXT NOT NULL, `added_by` TEXT, `added_at_utc` TEXT NOT NULL, `notes` TEXT, PRIMARY KEY(`identifier`, `identifier_type`), FOREIGN KEY(`device_id`) REFERENCES `ref_managed_device`(`device_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "identifier",
+            "columnName": "identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "identifierType",
+            "columnName": "identifier_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceId",
+            "columnName": "device_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addedBy",
+            "columnName": "added_by",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "addedAtUtc",
+            "columnName": "added_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "identifier",
+            "identifier_type"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ref_device_identifier_device_id",
+            "unique": false,
+            "columnNames": [
+              "device_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_device_identifier_device_id` ON `${TABLE_NAME}` (`device_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "ref_managed_device",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "device_id"
+            ],
+            "referencedColumns": [
+              "device_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ref_infrastructure_node",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`node_id` TEXT NOT NULL, `friendly_name` TEXT NOT NULL, `type` TEXT NOT NULL, `building_id` TEXT, `floor` INTEGER, `zone_id` TEXT, `x` REAL, `y` REAL, `latitude` REAL, `longitude` REAL, `known_bssid` TEXT, `known_ble_identifier` TEXT, `rtt_capable` INTEGER NOT NULL, `notes` TEXT, PRIMARY KEY(`node_id`))",
+        "fields": [
+          {
+            "fieldPath": "nodeId",
+            "columnName": "node_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "friendlyName",
+            "columnName": "friendly_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "floor",
+            "columnName": "floor",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "x",
+            "columnName": "x",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "y",
+            "columnName": "y",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "knownBssid",
+            "columnName": "known_bssid",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "knownBleIdentifier",
+            "columnName": "known_ble_identifier",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rttCapable",
+            "columnName": "rtt_capable",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "node_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ref_infrastructure_node_known_bssid",
+            "unique": false,
+            "columnNames": [
+              "known_bssid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_infrastructure_node_known_bssid` ON `${TABLE_NAME}` (`known_bssid`)"
+          },
+          {
+            "name": "index_ref_infrastructure_node_building_id_zone_id",
+            "unique": false,
+            "columnNames": [
+              "building_id",
+              "zone_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_infrastructure_node_building_id_zone_id` ON `${TABLE_NAME}` (`building_id`, `zone_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_observer",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`observer_id` TEXT NOT NULL, `friendly_name` TEXT NOT NULL, `observer_device_type` TEXT NOT NULL, `building_id` TEXT, `default_zone_id` TEXT, `device_model` TEXT, `manufacturer` TEXT, `platform` TEXT NOT NULL, `os_version` TEXT, `app_version` TEXT, `installation_id` TEXT, `capabilities` TEXT NOT NULL, `unsupported` TEXT NOT NULL, `x_coordinate` REAL, `y_coordinate` REAL, `fixed_observer` INTEGER NOT NULL, `enrolled` INTEGER NOT NULL, `enrolled_at_utc` TEXT, `notes` TEXT, PRIMARY KEY(`observer_id`))",
+        "fields": [
+          {
+            "fieldPath": "observerId",
+            "columnName": "observer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "friendlyName",
+            "columnName": "friendly_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observerDeviceType",
+            "columnName": "observer_device_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "defaultZoneId",
+            "columnName": "default_zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "device_model",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "manufacturer",
+            "columnName": "manufacturer",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "platform",
+            "columnName": "platform",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "osVersion",
+            "columnName": "os_version",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "appVersion",
+            "columnName": "app_version",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "installationId",
+            "columnName": "installation_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "capabilities",
+            "columnName": "capabilities",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unsupported",
+            "columnName": "unsupported",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xCoordinate",
+            "columnName": "x_coordinate",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "yCoordinate",
+            "columnName": "y_coordinate",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fixedObserver",
+            "columnName": "fixed_observer",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enrolled",
+            "columnName": "enrolled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enrolledAtUtc",
+            "columnName": "enrolled_at_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "observer_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_building",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`building_id` TEXT NOT NULL, `name` TEXT NOT NULL, `floors` TEXT NOT NULL, `outline_polygon` TEXT, `notes` TEXT, PRIMARY KEY(`building_id`))",
+        "fields": [
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "floors",
+            "columnName": "floors",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "outlinePolygon",
+            "columnName": "outline_polygon",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "building_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_zone",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`zone_id` TEXT NOT NULL, `building_id` TEXT NOT NULL, `name` TEXT NOT NULL, `floor` INTEGER NOT NULL, `zone_kind` TEXT NOT NULL, `polygon` TEXT, `centroid_x` REAL, `centroid_y` REAL, `enclosing_radius_m` REAL, `notes` TEXT, PRIMARY KEY(`zone_id`))",
+        "fields": [
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "floor",
+            "columnName": "floor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneKind",
+            "columnName": "zone_kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "polygon",
+            "columnName": "polygon",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "centroidX",
+            "columnName": "centroid_x",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "centroidY",
+            "columnName": "centroid_y",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "enclosingRadiusM",
+            "columnName": "enclosing_radius_m",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "zone_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ref_zone_building_id_floor",
+            "unique": false,
+            "columnNames": [
+              "building_id",
+              "floor"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_zone_building_id_floor` ON `${TABLE_NAME}` (`building_id`, `floor`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_zone_edge",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`from_zone_id` TEXT NOT NULL, `to_zone_id` TEXT NOT NULL, `edge_type` TEXT NOT NULL, `typical_traversal_s` REAL, `bidirectional` INTEGER NOT NULL, `notes` TEXT, PRIMARY KEY(`from_zone_id`, `to_zone_id`))",
+        "fields": [
+          {
+            "fieldPath": "fromZoneId",
+            "columnName": "from_zone_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toZoneId",
+            "columnName": "to_zone_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edgeType",
+            "columnName": "edge_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "typicalTraversalS",
+            "columnName": "typical_traversal_s",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bidirectional",
+            "columnName": "bidirectional",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "from_zone_id",
+            "to_zone_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ref_zone_edge_to_zone_id",
+            "unique": false,
+            "columnNames": [
+              "to_zone_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_zone_edge_to_zone_id` ON `${TABLE_NAME}` (`to_zone_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_survey_point",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`survey_point_id` TEXT NOT NULL, `building_id` TEXT NOT NULL, `zone_id` TEXT NOT NULL, `floor` INTEGER, `x` REAL NOT NULL, `y` REAL NOT NULL, `label` TEXT, `physical_description` TEXT, `created_at_utc` TEXT, `notes` TEXT, PRIMARY KEY(`survey_point_id`))",
+        "fields": [
+          {
+            "fieldPath": "surveyPointId",
+            "columnName": "survey_point_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "floor",
+            "columnName": "floor",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "x",
+            "columnName": "x",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "y",
+            "columnName": "y",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "label",
+            "columnName": "label",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "physicalDescription",
+            "columnName": "physical_description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAtUtc",
+            "columnName": "created_at_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "survey_point_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ref_survey_point_building_id_zone_id",
+            "unique": false,
+            "columnNames": [
+              "building_id",
+              "zone_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_survey_point_building_id_zone_id` ON `${TABLE_NAME}` (`building_id`, `zone_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_fingerprint",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fingerprint_id` TEXT NOT NULL, `survey_point_id` TEXT NOT NULL, `building_id` TEXT NOT NULL, `zone_id` TEXT NOT NULL, `x` REAL, `y` REAL, `observer_id` TEXT, `status` TEXT NOT NULL, `sample_count` INTEGER NOT NULL, `session_count` INTEGER, `source_survey_session_ids` TEXT NOT NULL, `engine_version` TEXT, `created_at_utc` TEXT, `updated_at_utc` TEXT, `promoted_by` TEXT, PRIMARY KEY(`fingerprint_id`))",
+        "fields": [
+          {
+            "fieldPath": "fingerprintId",
+            "columnName": "fingerprint_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surveyPointId",
+            "columnName": "survey_point_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "x",
+            "columnName": "x",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "y",
+            "columnName": "y",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerId",
+            "columnName": "observer_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sampleCount",
+            "columnName": "sample_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionCount",
+            "columnName": "session_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sourceSurveySessionIds",
+            "columnName": "source_survey_session_ids",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineVersion",
+            "columnName": "engine_version",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAtUtc",
+            "columnName": "created_at_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "updatedAtUtc",
+            "columnName": "updated_at_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "promotedBy",
+            "columnName": "promoted_by",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "fingerprint_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ref_fingerprint_survey_point_id",
+            "unique": false,
+            "columnNames": [
+              "survey_point_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_fingerprint_survey_point_id` ON `${TABLE_NAME}` (`survey_point_id`)"
+          },
+          {
+            "name": "index_ref_fingerprint_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_fingerprint_status` ON `${TABLE_NAME}` (`status`)"
+          },
+          {
+            "name": "index_ref_fingerprint_building_id_zone_id",
+            "unique": false,
+            "columnNames": [
+              "building_id",
+              "zone_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_fingerprint_building_id_zone_id` ON `${TABLE_NAME}` (`building_id`, `zone_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ref_fingerprint_entry",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fingerprint_id` TEXT NOT NULL, `radio_identifier` TEXT NOT NULL, `identifier_type` TEXT NOT NULL, `sample_count` INTEGER NOT NULL, `visibility_probability` REAL NOT NULL, `rssi_median` REAL NOT NULL, `rssi_mean` REAL, `rssi_stddev` REAL, `rssi_p10` REAL, `rssi_p90` REAL, `rssi_min` REAL, `rssi_max` REAL, `temporal_stability` REAL, PRIMARY KEY(`fingerprint_id`, `radio_identifier`), FOREIGN KEY(`fingerprint_id`) REFERENCES `ref_fingerprint`(`fingerprint_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "fingerprintId",
+            "columnName": "fingerprint_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radioIdentifier",
+            "columnName": "radio_identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "identifierType",
+            "columnName": "identifier_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sampleCount",
+            "columnName": "sample_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visibilityProbability",
+            "columnName": "visibility_probability",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rssiMedian",
+            "columnName": "rssi_median",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rssiMean",
+            "columnName": "rssi_mean",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rssiStddev",
+            "columnName": "rssi_stddev",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rssiP10",
+            "columnName": "rssi_p10",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rssiP90",
+            "columnName": "rssi_p90",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rssiMin",
+            "columnName": "rssi_min",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rssiMax",
+            "columnName": "rssi_max",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "temporalStability",
+            "columnName": "temporal_stability",
+            "affinity": "REAL",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "fingerprint_id",
+            "radio_identifier"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ref_fingerprint_entry_radio_identifier",
+            "unique": false,
+            "columnNames": [
+              "radio_identifier"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ref_fingerprint_entry_radio_identifier` ON `${TABLE_NAME}` (`radio_identifier`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "ref_fingerprint",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "fingerprint_id"
+            ],
+            "referencedColumns": [
+              "fingerprint_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ref_observer_calibration",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`observer_id` TEXT NOT NULL, `rssi_offset_db` REAL NOT NULL, `measured_at_utc` TEXT, `sample_count` INTEGER, `spread_db` REAL, `method` TEXT, `notes` TEXT, PRIMARY KEY(`observer_id`))",
+        "fields": [
+          {
+            "fieldPath": "observerId",
+            "columnName": "observer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rssiOffsetDb",
+            "columnName": "rssi_offset_db",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "measuredAtUtc",
+            "columnName": "measured_at_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sampleCount",
+            "columnName": "sample_count",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "spreadDb",
+            "columnName": "spread_db",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "method",
+            "columnName": "method",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "observer_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "der_position_estimate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`estimate_id` TEXT NOT NULL, `algorithm_version` TEXT NOT NULL, `engine_versions` TEXT NOT NULL, `parameter_set_sha256` TEXT, `device_id` TEXT NOT NULL, `timestamp_utc` TEXT NOT NULL, `timestamp_epoch_ms` INTEGER NOT NULL, `computed_at_utc` TEXT NOT NULL, `precision_tier` TEXT NOT NULL, `building_id` TEXT, `zone_id` TEXT, `x` REAL, `y` REAL, `horizontal_uncertainty_m` REAL, `confidence` REAL NOT NULL, `confidence_factors` TEXT NOT NULL, `method` TEXT NOT NULL, `supporting_observer_ids` TEXT NOT NULL, `supporting_observation_ids` TEXT NOT NULL, `source_dataset_ids` TEXT NOT NULL, `reference_model_id` TEXT, `calibration_set_id` TEXT, `quality_flags` TEXT NOT NULL, PRIMARY KEY(`estimate_id`))",
+        "fields": [
+          {
+            "fieldPath": "estimateId",
+            "columnName": "estimate_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "algorithmVersion",
+            "columnName": "algorithm_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineVersions",
+            "columnName": "engine_versions",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parameterSetSha256",
+            "columnName": "parameter_set_sha256",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "deviceId",
+            "columnName": "device_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampUtc",
+            "columnName": "timestamp_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampEpochMs",
+            "columnName": "timestamp_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "computedAtUtc",
+            "columnName": "computed_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "precisionTier",
+            "columnName": "precision_tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buildingId",
+            "columnName": "building_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "x",
+            "columnName": "x",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "y",
+            "columnName": "y",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "horizontalUncertaintyM",
+            "columnName": "horizontal_uncertainty_m",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "confidence",
+            "columnName": "confidence",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "confidenceFactors",
+            "columnName": "confidence_factors",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "method",
+            "columnName": "method",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportingObserverIds",
+            "columnName": "supporting_observer_ids",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportingObservationIds",
+            "columnName": "supporting_observation_ids",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceDatasetIds",
+            "columnName": "source_dataset_ids",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "referenceModelId",
+            "columnName": "reference_model_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "calibrationSetId",
+            "columnName": "calibration_set_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "qualityFlags",
+            "columnName": "quality_flags",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "estimate_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_der_position_estimate_device_id_timestamp_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "device_id",
+              "timestamp_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_position_estimate_device_id_timestamp_epoch_ms` ON `${TABLE_NAME}` (`device_id`, `timestamp_epoch_ms`)"
+          },
+          {
+            "name": "index_der_position_estimate_algorithm_version",
+            "unique": false,
+            "columnNames": [
+              "algorithm_version"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_position_estimate_algorithm_version` ON `${TABLE_NAME}` (`algorithm_version`)"
+          },
+          {
+            "name": "index_der_position_estimate_building_id_zone_id",
+            "unique": false,
+            "columnNames": [
+              "building_id",
+              "zone_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_position_estimate_building_id_zone_id` ON `${TABLE_NAME}` (`building_id`, `zone_id`)"
+          },
+          {
+            "name": "index_der_position_estimate_timestamp_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "timestamp_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_position_estimate_timestamp_epoch_ms` ON `${TABLE_NAME}` (`timestamp_epoch_ms`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "der_zone_transition",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transition_id` TEXT NOT NULL, `algorithm_version` TEXT NOT NULL, `engine_versions` TEXT NOT NULL, `device_id` TEXT NOT NULL, `event_type` TEXT NOT NULL, `origin_zone_id` TEXT, `destination_zone_id` TEXT, `transition_start_utc` TEXT NOT NULL, `transition_start_epoch_ms` INTEGER NOT NULL, `transition_confirmed_utc` TEXT NOT NULL, `confidence` REAL NOT NULL, `topology_status` TEXT NOT NULL, `supporting_observer_ids` TEXT NOT NULL, `supporting_estimate_ids` TEXT NOT NULL, `quality_flags` TEXT NOT NULL, PRIMARY KEY(`transition_id`))",
+        "fields": [
+          {
+            "fieldPath": "transitionId",
+            "columnName": "transition_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "algorithmVersion",
+            "columnName": "algorithm_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineVersions",
+            "columnName": "engine_versions",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceId",
+            "columnName": "device_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventType",
+            "columnName": "event_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originZoneId",
+            "columnName": "origin_zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "destinationZoneId",
+            "columnName": "destination_zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "transitionStartUtc",
+            "columnName": "transition_start_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transitionStartEpochMs",
+            "columnName": "transition_start_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transitionConfirmedUtc",
+            "columnName": "transition_confirmed_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "confidence",
+            "columnName": "confidence",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "topologyStatus",
+            "columnName": "topology_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportingObserverIds",
+            "columnName": "supporting_observer_ids",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportingEstimateIds",
+            "columnName": "supporting_estimate_ids",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualityFlags",
+            "columnName": "quality_flags",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "transition_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_der_zone_transition_device_id_transition_start_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "device_id",
+              "transition_start_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_zone_transition_device_id_transition_start_epoch_ms` ON `${TABLE_NAME}` (`device_id`, `transition_start_epoch_ms`)"
+          },
+          {
+            "name": "index_der_zone_transition_algorithm_version",
+            "unique": false,
+            "columnNames": [
+              "algorithm_version"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_zone_transition_algorithm_version` ON `${TABLE_NAME}` (`algorithm_version`)"
+          },
+          {
+            "name": "index_der_zone_transition_topology_status",
+            "unique": false,
+            "columnNames": [
+              "topology_status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_zone_transition_topology_status` ON `${TABLE_NAME}` (`topology_status`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "der_movement_estimate",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`movement_id` TEXT NOT NULL, `algorithm_version` TEXT NOT NULL, `engine_versions` TEXT NOT NULL, `device_id` TEXT NOT NULL, `timestamp_utc` TEXT NOT NULL, `timestamp_epoch_ms` INTEGER NOT NULL, `state` TEXT NOT NULL, `origin_zone_id` TEXT, `candidate_destination_zone_id` TEXT, `confirmed_destination_zone_id` TEXT, `direction` TEXT, `confidence` REAL NOT NULL, `supporting_estimate_ids` TEXT NOT NULL, `quality_flags` TEXT NOT NULL, PRIMARY KEY(`movement_id`))",
+        "fields": [
+          {
+            "fieldPath": "movementId",
+            "columnName": "movement_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "algorithmVersion",
+            "columnName": "algorithm_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineVersions",
+            "columnName": "engine_versions",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceId",
+            "columnName": "device_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampUtc",
+            "columnName": "timestamp_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampEpochMs",
+            "columnName": "timestamp_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originZoneId",
+            "columnName": "origin_zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "candidateDestinationZoneId",
+            "columnName": "candidate_destination_zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "confirmedDestinationZoneId",
+            "columnName": "confirmed_destination_zone_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "direction",
+            "columnName": "direction",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "confidence",
+            "columnName": "confidence",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportingEstimateIds",
+            "columnName": "supporting_estimate_ids",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualityFlags",
+            "columnName": "quality_flags",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "movement_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_der_movement_estimate_device_id_timestamp_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "device_id",
+              "timestamp_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_movement_estimate_device_id_timestamp_epoch_ms` ON `${TABLE_NAME}` (`device_id`, `timestamp_epoch_ms`)"
+          },
+          {
+            "name": "index_der_movement_estimate_algorithm_version",
+            "unique": false,
+            "columnNames": [
+              "algorithm_version"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_movement_estimate_algorithm_version` ON `${TABLE_NAME}` (`algorithm_version`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "der_quality_flag",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`flag_id` TEXT NOT NULL, `algorithm_version` TEXT, `created_at_utc` TEXT NOT NULL, `severity` TEXT NOT NULL, `code` TEXT NOT NULL, `scope` TEXT NOT NULL, `scope_id` TEXT, `message` TEXT NOT NULL, `evidence` TEXT NOT NULL, `acknowledged_at_utc` TEXT, `acknowledged_by` TEXT, PRIMARY KEY(`flag_id`))",
+        "fields": [
+          {
+            "fieldPath": "flagId",
+            "columnName": "flag_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "algorithmVersion",
+            "columnName": "algorithm_version",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAtUtc",
+            "columnName": "created_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "severity",
+            "columnName": "severity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scope",
+            "columnName": "scope",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scopeId",
+            "columnName": "scope_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "evidence",
+            "columnName": "evidence",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "acknowledgedAtUtc",
+            "columnName": "acknowledged_at_utc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "acknowledgedBy",
+            "columnName": "acknowledged_by",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "flag_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_der_quality_flag_algorithm_version",
+            "unique": false,
+            "columnNames": [
+              "algorithm_version"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_quality_flag_algorithm_version` ON `${TABLE_NAME}` (`algorithm_version`)"
+          },
+          {
+            "name": "index_der_quality_flag_severity",
+            "unique": false,
+            "columnNames": [
+              "severity"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_quality_flag_severity` ON `${TABLE_NAME}` (`severity`)"
+          },
+          {
+            "name": "index_der_quality_flag_scope_scope_id",
+            "unique": false,
+            "columnNames": [
+              "scope",
+              "scope_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_quality_flag_scope_scope_id` ON `${TABLE_NAME}` (`scope`, `scope_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "der_generation",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`algorithm_version` TEXT NOT NULL, `export_id` TEXT NOT NULL, `imported_at_utc` TEXT NOT NULL, `created_at_utc` TEXT NOT NULL, `engine_versions` TEXT NOT NULL, `dataset_kind` TEXT NOT NULL, `source_dataset_ids` TEXT NOT NULL, `estimate_count` INTEGER NOT NULL, `transition_count` INTEGER NOT NULL, `movement_count` INTEGER NOT NULL, `is_active` INTEGER NOT NULL, PRIMARY KEY(`algorithm_version`))",
+        "fields": [
+          {
+            "fieldPath": "algorithmVersion",
+            "columnName": "algorithm_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exportId",
+            "columnName": "export_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "importedAtUtc",
+            "columnName": "imported_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtUtc",
+            "columnName": "created_at_utc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "engineVersions",
+            "columnName": "engine_versions",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "datasetKind",
+            "columnName": "dataset_kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceDatasetIds",
+            "columnName": "source_dataset_ids",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estimateCount",
+            "columnName": "estimate_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transitionCount",
+            "columnName": "transition_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "movementCount",
+            "columnName": "movement_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "is_active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "algorithm_version"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_der_generation_imported_at_utc",
+            "unique": false,
+            "columnNames": [
+              "imported_at_utc"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_der_generation_imported_at_utc` ON `${TABLE_NAME}` (`imported_at_utc`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ea37d0672b0e87b3c7796fad50b0f756')"
+    ]
+  }
+}

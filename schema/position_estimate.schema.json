@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rfmapper.local/schema/1.0.0/position_estimate.schema.json",
+  "title": "RFMapper Position Estimate",
+  "description": "A derived spatial estimate for one managed device at one instant. Coordinates are optional; uncertainty is not. A confident zone-only estimate is preferable to a fabricated coordinate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "estimate_id",
+    "algorithm_version",
+    "engine_versions",
+    "device_id",
+    "timestamp_utc",
+    "computed_at_utc",
+    "precision_tier",
+    "confidence",
+    "confidence_factors",
+    "method",
+    "supporting_observer_ids",
+    "supporting_observation_ids",
+    "source_dataset_ids"
+  ],
+  "properties": {
+    "estimate_id": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "algorithm_version": { "type": "string", "minLength": 1 },
+    "engine_versions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "parameter_set_sha256": { "type": ["string", "null"] },
+    "device_id": {
+      "description": "A managed device id. Never a randomized radio identifier: positioning is defined only for enrolled devices.",
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp_utc": { "type": "string" },
+    "computed_at_utc": { "type": "string" },
+    "precision_tier": {
+      "type": "string",
+      "enum": ["SITE_PRESENCE", "BUILDING", "ZONE", "APPROXIMATE_POSITION", "PRECISION_RANGE"]
+    },
+    "building_id": { "type": ["string", "null"] },
+    "zone_id": { "type": ["string", "null"] },
+    "x": { "type": ["number", "null"] },
+    "y": { "type": ["number", "null"] },
+    "horizontal_uncertainty_m": {
+      "description": "Required whenever x/y are present. A coordinate without uncertainty is not a permitted output.",
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "confidence_factors": {
+      "description": "The named factors whose weighted product is `confidence`, so any confidence value can be explained.",
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "method": { "type": "string", "minLength": 1 },
+    "supporting_observer_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "supporting_observation_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "source_dataset_ids": { "type": "array", "items": { "type": "string" } },
+    "reference_model_id": { "type": ["string", "null"] },
+    "calibration_set_id": { "type": ["string", "null"] },
+    "quality_flags": { "type": "array", "items": { "type": "string" } }
+  },
+  "allOf": [
+    {
+      "$comment": "x and y are all-or-nothing.",
+      "if": { "properties": { "x": { "type": "number" } }, "required": ["x"] },
+      "then": { "required": ["y"], "properties": { "y": { "type": "number" } } }
+    },
+    {
+      "$comment": "No coordinate may be emitted without an uncertainty, and only the two positional tiers may carry coordinates.",
+      "if": { "properties": { "x": { "type": "number" } }, "required": ["x"] },
+      "then": {
+        "required": ["horizontal_uncertainty_m"],
+        "properties": {
+          "horizontal_uncertainty_m": { "type": "number", "exclusiveMinimum": 0 },
+          "precision_tier": { "enum": ["APPROXIMATE_POSITION", "PRECISION_RANGE"] }
+        }
+      }
+    },
+    {
+      "$comment": "The positional tiers require coordinates.",
+      "if": { "properties": { "precision_tier": { "enum": ["APPROXIMATE_POSITION", "PRECISION_RANGE"] } }, "required": ["precision_tier"] },
+      "then": {
+        "required": ["x", "y", "horizontal_uncertainty_m"],
+        "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+      }
+    },
+    {
+      "$comment": "A zone is meaningless without its building.",
+      "if": { "properties": { "zone_id": { "type": "string" } }, "required": ["zone_id"] },
+      "then": { "required": ["building_id"], "properties": { "building_id": { "type": "string" } } }
+    },
+    {
+      "$comment": "Tiers below ZONE must not assert a zone.",
+      "if": { "properties": { "precision_tier": { "const": "SITE_PRESENCE" } }, "required": ["precision_tier"] },
+      "then": { "properties": { "zone_id": { "const": null }, "x": { "const": null }, "y": { "const": null } } }
+    }
+  ]
+}

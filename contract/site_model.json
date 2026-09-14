@@ -1,0 +1,303 @@
+{
+  "schema_version": "1.0.0",
+  "reference_model_id": "site-contract-2026-05-04",
+  "created_at": "2026-05-04T12:00:00.000Z",
+  "notes": "Cross-language contract fixture. Not a real site.",
+  "frame": {
+    "origin_lat": 51.5074,
+    "origin_lon": -0.1278,
+    "rotation_deg": 12.5,
+    "projection": "LOCAL_TANGENT_PLANE"
+  },
+  "buildings": [
+    {
+      "building_id": "B1",
+      "name": "Workshop",
+      "floors": [
+        0
+      ],
+      "outline_polygon": [
+        {
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "x": 10.0,
+          "y": 0.0
+        },
+        {
+          "x": 10.0,
+          "y": 14.0
+        },
+        {
+          "x": 0.0,
+          "y": 14.0
+        }
+      ],
+      "notes": null
+    }
+  ],
+  "zones": [
+    {
+      "zone_id": "B1-NORTH",
+      "building_id": "B1",
+      "name": "North bay",
+      "floor": 0,
+      "zone_kind": "ROOM",
+      "polygon": [
+        {
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "x": 10.0,
+          "y": 0.0
+        },
+        {
+          "x": 10.0,
+          "y": 7.0
+        },
+        {
+          "x": 0.0,
+          "y": 7.0
+        }
+      ],
+      "centroid_x": 5.0,
+      "centroid_y": 3.5,
+      "enclosing_radius_m": 6.103277807866851,
+      "notes": null
+    },
+    {
+      "zone_id": "B1-SOUTH",
+      "building_id": "B1",
+      "name": "South bay",
+      "floor": 0,
+      "zone_kind": "ROOM",
+      "polygon": [
+        {
+          "x": 0.0,
+          "y": 7.0
+        },
+        {
+          "x": 10.0,
+          "y": 7.0
+        },
+        {
+          "x": 10.0,
+          "y": 14.0
+        },
+        {
+          "x": 0.0,
+          "y": 14.0
+        }
+      ],
+      "centroid_x": 5.0,
+      "centroid_y": 10.5,
+      "enclosing_radius_m": 6.103277807866851,
+      "notes": null
+    }
+  ],
+  "zone_edges": [
+    {
+      "from_zone_id": "B1-NORTH",
+      "to_zone_id": "B1-SOUTH",
+      "edge_type": "DOOR",
+      "typical_traversal_s": 4.0,
+      "bidirectional": true,
+      "notes": null
+    }
+  ],
+  "infrastructure_nodes": [
+    {
+      "node_id": "AP-NORTH",
+      "friendly_name": "North AP",
+      "type": "WIFI_AP",
+      "building_id": "B1",
+      "floor": 0,
+      "zone_id": "B1-NORTH",
+      "x": 2.0,
+      "y": 2.0,
+      "latitude": null,
+      "longitude": null,
+      "known_bssid": "aa:bb:cc:00:00:01",
+      "known_ble_identifier": null,
+      "rtt_capable": false,
+      "notes": null
+    },
+    {
+      "node_id": "OBS-C1",
+      "friendly_name": "North collector",
+      "type": "OBSERVER_PHONE",
+      "building_id": "B1",
+      "floor": 0,
+      "zone_id": "B1-NORTH",
+      "x": 2.0,
+      "y": 3.0,
+      "latitude": null,
+      "longitude": null,
+      "known_bssid": null,
+      "known_ble_identifier": "c1:c1:c1:00:00:01",
+      "rtt_capable": false,
+      "notes": null
+    },
+    {
+      "node_id": "AP-RTT",
+      "friendly_name": "Ranging AP",
+      "type": "RTT_ANCHOR",
+      "building_id": "B1",
+      "floor": 0,
+      "zone_id": "B1-NORTH",
+      "x": 8.0,
+      "y": 7.0,
+      "latitude": null,
+      "longitude": null,
+      "known_bssid": "aa:bb:cc:00:00:03",
+      "known_ble_identifier": null,
+      "rtt_capable": true,
+      "notes": "rtt_capable set from an observed range, never from the datasheet"
+    },
+    {
+      "node_id": "AP-SOUTH",
+      "friendly_name": "South AP",
+      "type": "WIFI_AP",
+      "building_id": "B1",
+      "floor": 0,
+      "zone_id": "B1-SOUTH",
+      "x": 2.0,
+      "y": 12.0,
+      "latitude": null,
+      "longitude": null,
+      "known_bssid": "aa:bb:cc:00:00:02",
+      "known_ble_identifier": null,
+      "rtt_capable": false,
+      "notes": null
+    },
+    {
+      "node_id": "OBS-C2",
+      "friendly_name": "South collector",
+      "type": "OBSERVER_PHONE",
+      "building_id": "B1",
+      "floor": 0,
+      "zone_id": "B1-SOUTH",
+      "x": 2.0,
+      "y": 11.0,
+      "latitude": null,
+      "longitude": null,
+      "known_bssid": null,
+      "known_ble_identifier": "c2:c2:c2:00:00:02",
+      "rtt_capable": false,
+      "notes": null
+    }
+  ],
+  "observers": [
+    {
+      "schema_version": "1.0.0",
+      "observer_id": "OBS-C1",
+      "friendly_name": "North collector",
+      "observer_device_type": "ANDROID_PHONE",
+      "building_id": "B1",
+      "default_zone_id": "B1-NORTH",
+      "device_model": "Pixel 7a",
+      "manufacturer": "Google",
+      "platform": "android",
+      "os_version": "34",
+      "app_version": "1.0.0",
+      "installation_id": "b1c2d3e4-1111-4222-8333-444455556601",
+      "capabilities": [
+        "WIFI_SCAN",
+        "BLE",
+        "GPS",
+        "RTT"
+      ],
+      "unsupported": [
+        "WIFI_ASSOCIATION"
+      ],
+      "x_coordinate": 2.0,
+      "y_coordinate": 3.0,
+      "fixed_observer": true,
+      "notes": null
+    },
+    {
+      "schema_version": "1.0.0",
+      "observer_id": "OBS-C2",
+      "friendly_name": "South collector",
+      "observer_device_type": "ANDROID_PHONE",
+      "building_id": "B1",
+      "default_zone_id": "B1-SOUTH",
+      "device_model": "Pixel 7a",
+      "manufacturer": "Google",
+      "platform": "android",
+      "os_version": "34",
+      "app_version": "1.0.0",
+      "installation_id": "b1c2d3e4-1111-4222-8333-444455556602",
+      "capabilities": [
+        "WIFI_SCAN",
+        "BLE",
+        "GPS",
+        "RTT"
+      ],
+      "unsupported": [
+        "WIFI_ASSOCIATION"
+      ],
+      "x_coordinate": 2.0,
+      "y_coordinate": 11.0,
+      "fixed_observer": true,
+      "notes": null
+    },
+    {
+      "schema_version": "1.0.0",
+      "observer_id": "OBS-C3",
+      "friendly_name": "Survey handset",
+      "observer_device_type": "ANDROID_PHONE",
+      "building_id": "B1",
+      "default_zone_id": "B1-NORTH",
+      "device_model": "Pixel 7a",
+      "manufacturer": "Google",
+      "platform": "android",
+      "os_version": "34",
+      "app_version": "1.0.0",
+      "installation_id": "b1c2d3e4-1111-4222-8333-444455556603",
+      "capabilities": [
+        "WIFI_SCAN",
+        "BLE",
+        "GPS",
+        "RTT"
+      ],
+      "unsupported": [
+        "WIFI_ASSOCIATION"
+      ],
+      "x_coordinate": null,
+      "y_coordinate": null,
+      "fixed_observer": false,
+      "notes": null
+    }
+  ],
+  "survey_points": [
+    {
+      "survey_point_id": "SP-N",
+      "building_id": "B1",
+      "zone_id": "B1-NORTH",
+      "floor": 0,
+      "x": 2.0,
+      "y": 2.0,
+      "label": "North bay, under the AP",
+      "physical_description": "Floor marker N, 1 m from the north wall",
+      "created_at_utc": "2026-05-04T08:00:00.000Z",
+      "notes": null
+    },
+    {
+      "survey_point_id": "SP-S",
+      "building_id": "B1",
+      "zone_id": "B1-SOUTH",
+      "floor": 0,
+      "x": 2.0,
+      "y": 12.0,
+      "label": "South bay, by the roller door",
+      "physical_description": "Floor marker S, 2 m from the roller door",
+      "created_at_utc": "2026-05-04T08:00:00.000Z",
+      "notes": null
+    }
+  ],
+  "fingerprints": [],
+  "observer_calibration": []
+}
