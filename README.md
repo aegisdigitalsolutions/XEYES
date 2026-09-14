@@ -115,3 +115,11 @@ Until a real survey has been collected and benchmarked, every coordinate the Lab
 `UNVALIDATED_UNCERTAINTY` flag and an error bar derived from geometry rather than measurement. That
 is the intended state, not a gap to be papered over: `rfmapper-lab benchmark` on real ground truth
 is what replaces it.
+
+A site with no survey at all is also supported, and is a different proposition rather than a lesser
+one. Where the only evidence is which access point a device is associated with — APs on the towers
+and enclosures already on site — the answer is the name of a tower, with no coordinates and no
+figure in metres. See
+[`docs/19-association-only-deployment.md`](docs/19-association-only-deployment.md) for how to model
+it, which classifier to select, and why the movement thresholds need setting before that deployment
+will record anything moving.

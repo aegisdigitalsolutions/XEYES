@@ -74,6 +74,15 @@ Null coordinates with a confident zone is a normal and preferred outcome. `PRECI
 unreachable without ranging evidence, and the Master re-checks that claim on import rather than
 trusting the producer.
 
+**A site without a survey is a supported deployment, not a broken one.** If the only evidence is
+which AP a device is associated with — access points on towers, no survey, ever — then
+`--zone-engine zone_anchor_v1` answers with the tower and no coordinates, and that is the ceiling
+of that evidence. The default classifier compares against fingerprints, finds none, and honestly
+answers `BUILDING`, which looks like a broken installation; the engine has to be chosen
+deliberately. See [`docs/19`](../docs/19-association-only-deployment.md), which also covers the
+hysteresis thresholds, since their defaults assume the other deployment and will otherwise record
+no movement between towers at all.
+
 **Attribution is registry-driven.** A radio identifier that is not in the device registry attributes
 to nothing, and a device that is not in the registry gets no estimate at all
 ([`docs/17`](../docs/17-identity-and-attribution-policy.md) §4). A run without `--devices` therefore
@@ -212,3 +221,4 @@ tests/             Contracts, parsing, inference, fusion, movement, pipeline, be
 - [`docs/16`](../docs/16-export-package-specification.md) — export package specification
 - [`docs/17`](../docs/17-identity-and-attribution-policy.md) — identity and attribution policy
 - [`docs/18`](../docs/18-site-model-specification.md) — site model specification
+- [`docs/19`](../docs/19-association-only-deployment.md) — the no-survey, association-only deployment

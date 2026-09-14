@@ -198,6 +198,14 @@ class PosZoneCentroidV1:
     Explicitly coarse, and the uncertainty says so: it is the radius of the zone, derived from real
     site geometry rather than from a constant. Used when the zone is known but no located
     fingerprint can refine a position within it.
+
+    It requires a *surveyed* zone, and declines otherwise. A fingerprint match says the device's
+    signal environment resembles measurements taken inside the zone, which makes the middle of that
+    zone a defensible point estimate and its radius a defensible bound. Coverage-derived zone
+    evidence says only that a device is within range of one transmitter, and range is asymmetric,
+    environment-dependent and frequently much larger than the drawn polygon. Taking the centroid of
+    it would report the transmitter's own position as the device's, with a tidy circle around it —
+    the fabricated precision ``ZoneAnchorV1`` promises not to produce.
     """
 
     id = "pos_zone_centroid_v1"
@@ -213,6 +221,8 @@ class PosZoneCentroidV1:
     ) -> Placement | None:
         best = zones.best
         if best is None:
+            return None
+        if not best.fingerprint_ids:
             return None
         zone = model.zones.get(best.zone_id)
         if zone is None:

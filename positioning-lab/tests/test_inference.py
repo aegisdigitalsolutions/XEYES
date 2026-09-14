@@ -714,7 +714,15 @@ class TestPlacement:
         sited, positions = triangle
         zone_id = sorted(sited.zones)[0]
         zones = ZoneResult(
-            (ZoneCandidate(zone_id, sited.zones[zone_id].building_id, 0.9),), "test"
+            (
+                ZoneCandidate(
+                    zone_id,
+                    sited.zones[zone_id].building_id,
+                    0.9,
+                    fingerprint_ids=("fp-a",),
+                ),
+            ),
+            "test",
         )
         located = (
             _point(zone_id, [_entry("ap-1", -60)], x=5.0, y=5.0, suffix="-a"),
@@ -738,7 +746,9 @@ class TestPlacement:
         )
         assert zone_id is not None, "the simulated site must publish zone geometry"
         zone = model.zones[zone_id]
-        zones = ZoneResult((ZoneCandidate(zone_id, zone.building_id, 0.7),), "test")
+        zones = ZoneResult(
+            (ZoneCandidate(zone_id, zone.building_id, 0.7, fingerprint_ids=("fp-a",)),), "test"
+        )
 
         placement = POSITIONING_ENGINES.get("pos_zone_centroid_v1").estimate(
             _vector({"ap-1": -60.0}), zones, (), model, DEFAULTS
@@ -746,6 +756,32 @@ class TestPlacement:
 
         assert placement.sigma_geometric_m == pytest.approx(zone.radius_m)
         assert "ZONE_CENTROID_ONLY" in placement.quality_flags
+
+    def test_a_zone_known_only_from_coverage_yields_no_coordinates(self, model):
+        """The centroid of an AP's coverage area is the AP's own position, and a device associated
+        with it is not thereby known to be underneath it.
+
+        A fingerprint match compares the device's signal environment against measurements taken
+        inside the zone, which is what makes the middle of the zone a defensible point estimate.
+        Coverage says only "within range of one transmitter", and range is asymmetric and
+        environment-dependent. So the answer is the zone, with no point and no circle.
+        """
+        zone_id = next(z for z, zone in sorted(model.zones.items()) if zone.radius_m)
+        zone = model.zones[zone_id]
+        from_coverage = ZoneResult((ZoneCandidate(zone_id, zone.building_id, 0.7),), "test")
+
+        assert (
+            POSITIONING_ENGINES.get("pos_zone_centroid_v1").estimate(
+                _vector({"ap-1": -60.0}), from_coverage, (), model, DEFAULTS
+            )
+            is None
+        )
+
+        # And the chain falls through to the zone, rather than to nothing at all.
+        placement = place(_vector({"ap-1": -60.0}), from_coverage, (), model, DEFAULTS)
+        assert placement.method == "pos_zone_only_v1"
+        assert placement.precision_tier is PrecisionTier.ZONE
+        assert not placement.has_coordinates
 
 
 class TestUncertainty:

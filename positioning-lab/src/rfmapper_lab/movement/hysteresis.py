@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import Mapping, Sequence
 
 from ..jsonio import derive_id
 from ..models import (
@@ -44,6 +44,19 @@ class TrackResult:
     movements: tuple[MovementEstimate, ...]
     oscillations: int = 0
     topology_violations: int = 0
+    #: Observed zone changes that never became transitions, and the gate that stopped each.
+    #:
+    #: Without this a device can appear to sit in one zone for a whole day while the evidence said
+    #: otherwise for most of it, and nothing anywhere explains the discrepancy. On a site whose
+    #: evidence produces lower confidence than the thresholds were set for — association reports
+    #: rather than a fingerprint survey, say — that is the difference between an empty movement
+    #: history and an empty movement history that says why it is empty.
+    withheld: int = 0
+    #: Gate name to the number of withheld candidates it rejected. A candidate failing two gates is
+    #: counted under both, so these do not sum to :attr:`withheld`.
+    withheld_by_gate: Mapping[str, int] = field(default_factory=dict)
+    #: The highest confidence a withheld candidate reached. What the threshold would have to clear.
+    peak_withheld_confidence: float | None = None
 
 
 @dataclass
@@ -56,6 +69,8 @@ class _State:
     candidate_confidence: float = 0.0
     candidate_support: list[str] = field(default_factory=list)
     candidate_observers: set[str] = field(default_factory=set)
+    #: Peak duration reached, kept because `candidate_duration_ms` decays on a returning estimate.
+    candidate_peak_duration_ms: float = 0.0
     last_ms: int | None = None
     last_x: float | None = None
     last_y: float | None = None
@@ -68,6 +83,33 @@ class _State:
         self.candidate_confidence = 0.0
         self.candidate_support = []
         self.candidate_observers = set()
+        self.candidate_peak_duration_ms = 0.0
+
+
+@dataclass
+class _Withheld:
+    """Tally of candidates that were never committed, and why."""
+
+    count: int = 0
+    by_gate: dict[str, int] = field(default_factory=dict)
+    peak_confidence: float | None = None
+
+    def record(self, state: _State, movement) -> None:
+        failed = []
+        if state.candidate_peak_duration_ms < movement.min_candidate_duration_ms:
+            failed.append("duration")
+        if state.candidate_confidence < movement.min_transition_confidence:
+            failed.append("confidence")
+        if len(state.candidate_support) < movement.min_supporting_observations:
+            failed.append("support")
+        if not failed:
+            # Every gate was met, so the candidate was committed and this is not a withholding.
+            return
+        self.count += 1
+        for gate in failed:
+            self.by_gate[gate] = self.by_gate.get(gate, 0) + 1
+        if self.peak_confidence is None or state.candidate_confidence > self.peak_confidence:
+            self.peak_confidence = state.candidate_confidence
 
 
 class MovementEngineV1:
@@ -90,6 +132,7 @@ class MovementEngineV1:
         transitions: list[ZoneTransition] = []
         movements: list[MovementEstimate] = []
         committed: list[tuple[int, str | None, str]] = []
+        withheld = _Withheld()
 
         for estimate in ordered:
             now = parse_ms(estimate.timestamp_utc)
@@ -212,10 +255,17 @@ class MovementEngineV1:
 
             if zone_id == state.candidate_zone_id:
                 state.candidate_duration_ms += gap
+                state.candidate_peak_duration_ms = max(
+                    state.candidate_peak_duration_ms, state.candidate_duration_ms
+                )
                 state.candidate_confidence = max(state.candidate_confidence, estimate.confidence)
                 state.candidate_support.append(estimate.estimate_id)
                 state.candidate_observers.update(estimate.supporting_observer_ids)
             else:
+                # The device appears to have moved somewhere else again without the previous
+                # candidate ever being committed. That is a zone change the record will not show.
+                if state.candidate_zone_id is not None:
+                    withheld.record(state, movement)
                 state.reset_candidate()
                 state.candidate_zone_id = zone_id
                 state.candidate_start_ms = now
@@ -299,6 +349,11 @@ class MovementEngineV1:
 
             state.last_ms, state.last_x, state.last_y = now, estimate.x, estimate.y
 
+        if state.candidate_zone_id is not None:
+            # Still pending when the day ran out. This is the shape a genuine uncommitted move
+            # takes: the device went somewhere and stayed, and the record never followed it.
+            withheld.record(state, movement)
+
         return TrackResult(
             transitions=tuple(transitions),
             movements=tuple(movements),
@@ -306,6 +361,9 @@ class MovementEngineV1:
             topology_violations=sum(
                 1 for t in transitions if t.topology_status is TopologyStatus.NON_ADJACENT
             ),
+            withheld=withheld.count,
+            withheld_by_gate=dict(sorted(withheld.by_gate.items())),
+            peak_withheld_confidence=withheld.peak_confidence,
         )
 
     # -- helpers ----------------------------------------------------------------------------------

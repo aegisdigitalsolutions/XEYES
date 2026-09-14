@@ -211,6 +211,11 @@ def _minimal_algorithm_report(result: PipelineResult) -> dict[str, Any]:
             "method_breakdown": result.method_breakdown(),
             "oscillations": result.oscillations,
             "topology_violations": result.topology_violations,
+            # An empty movement history has two very different causes — nothing moved, or every
+            # move was held back by a threshold — and only these numbers tell them apart.
+            "withheld_transitions": result.withheld_transitions,
+            "withheld_by_gate": dict(sorted(result.withheld_by_gate.items())),
+            "peak_withheld_confidence": result.peak_withheld_confidence,
             "devices": len({estimate.device_id for estimate in result.estimates}),
             "promoted_fingerprints": len(result.fingerprints.promoted),
             "candidate_fingerprints": len(result.fingerprints.candidates),
