@@ -48,13 +48,23 @@ def confidence_factors(
     """Compute every factor. Each is in [0, 1] and each has a single, stateable meaning."""
     factors: dict[str, float] = {}
 
+    association_only = _association_only(vector)
+
     observers = len(vector.observer_ids)
     # Two observers is the first point at which a claim is corroborated rather than asserted — but
     # only if their evidence carried weight. Three observers whose readings were all stale, all
     # uncalibrated and all from the weakest sensor corroborate nothing, and counting them as three
     # would let the count factor launder exactly the evidence the fusion weights discounted.
     strength = min(1.0, max(frame_weights.values(), default=0.0))
-    factors["observer_count"] = min(1.0, 0.45 + 0.275 * min(observers, 3)) * max(0.5, strength)
+    if association_only:
+        # Same reasoning as ``rtt_quality`` below: a factor measuring a quality the evidence cannot
+        # exhibit is neutral rather than a penalty. A device holds one Wi-Fi association at a time,
+        # so a second observer is unobtainable here, not merely absent. Scoring it as a lone
+        # unconfirmed sighting would hold an association-only site permanently at a confidence no
+        # threshold downstream can clear, whatever the evidence said.
+        factors["observer_count"] = max(0.5, strength)
+    else:
+        factors["observer_count"] = min(1.0, 0.45 + 0.275 * min(observers, 3)) * max(0.5, strength)
 
     freshest = min((m.age_ms for m in vector.measurements), default=0)
     decay = 0.5 ** (freshest / max(1, params.fusion.freshness_half_life_ms))
@@ -112,11 +122,29 @@ def confidence_factors(
     # one with four, whatever the match looked like.
     factors["calibration_density"] = min(1.0, 0.45 + 0.2 * min(fingerprints_in_zone, 3))
 
-    if placement.precision_tier is PrecisionTier.ZONE and not placement.supporting_fingerprint_ids:
-        # A zone asserted from anchor visibility alone, with no fingerprint behind it.
+    if association_only:
+        # An association rests on a negotiated connection, not on a signal comparison, so the
+        # density of nearby survey points says nothing about it either way. A site that will never
+        # be surveyed must not be charged for the survey it will never have.
+        factors["calibration_density"] = 1.0
+    elif placement.precision_tier is PrecisionTier.ZONE and not placement.supporting_fingerprint_ids:
+        # A zone asserted from anchor visibility alone, with no fingerprint behind it. Unlike an
+        # association this is a detection that others could have corroborated and did not.
         factors["calibration_density"] = min(factors["calibration_density"], 0.5)
 
     return {name: round(_clip(value), 4) for name, value in sorted(factors.items())}
+
+
+def _association_only(vector: LiveVector) -> bool:
+    """Whether every measurement in this window is a Wi-Fi association report.
+
+    Kept strict deliberately. A tower that merely *scanned* a device could have been one of
+    several to hear it, so a lone scan is genuinely weak corroboration and keeps its penalty; an
+    association is one-to-one by protocol and cannot be corroborated by anyone. Mixing the two in
+    one window means the scan evidence is present and the ordinary factors apply.
+    """
+    sensors = {measurement.sensor_type for measurement in vector.measurements}
+    return sensors == {SensorType.WIFI_ASSOCIATION}
 
 
 def combine_factors(factors: Mapping[str, float], exponents: Mapping[str, float] = EXPONENTS) -> float:
