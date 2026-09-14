@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        The Master declares no radio permission at all, and that absence is a design statement.
+        It never scans: it reads packages that enrolled observers carried to it. A console that
+        could also collect would make "which observer produced this?" unanswerable for its own
+        rows, and provenance is the property the whole raw layer rests on.
+    -->
+
+    <application
+        android:name=".MasterApplication"
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.RFMapperMaster">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

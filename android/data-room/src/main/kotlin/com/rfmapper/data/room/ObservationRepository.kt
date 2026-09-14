@@ -1,5 +1,6 @@
 package com.rfmapper.data.room
 
+import androidx.paging.PagingSource
 import com.rfmapper.core.export.ObservationSource
 import com.rfmapper.core.export.ObservationSummary
 import com.rfmapper.core.importing.ExistingIdLookup
@@ -182,6 +183,38 @@ class ObservationRepository(
 
     fun observeIdentifierActivity(fromEpochMs: Long, toEpochMs: Long, limit: Int = 50) =
         observeCount().map { observations.topIdentifiers(fromEpochMs, toEpochMs, limit) }
+
+    /**
+     * The Master's observation browser.
+     *
+     * Paged by the framework rather than loaded wholesale: the raw layer is the one table expected
+     * to reach hundreds of thousands of rows, and a browser that materialised it would be unusable
+     * on exactly the datasets worth browsing.
+     */
+    fun browse(
+        observerId: String? = null,
+        sensorType: String? = null,
+        identifier: String? = null,
+        buildingId: String? = null,
+        fromEpochMs: Long = 0L,
+        toEpochMs: Long = Long.MAX_VALUE,
+    ): PagingSource<Int, RawObservationEntity> = observations.pageFiltered(
+        observerId = observerId,
+        sensorType = sensorType,
+        identifier = identifier,
+        buildingId = buildingId,
+        fromEpochMs = fromEpochMs,
+        toEpochMs = toEpochMs,
+    )
+
+    suspend fun topIdentifiers(limit: Int = 50) = withContext(Dispatchers.IO) {
+        observations.topIdentifiers(0L, Long.MAX_VALUE, limit)
+    }
+
+    suspend fun observedRange(): Pair<Long, Long>? = withContext(Dispatchers.IO) {
+        val earliest = observations.earliestEpochMs() ?: return@withContext null
+        earliest to (observations.latestEpochMs() ?: earliest)
+    }
 
     companion object {
         /**
