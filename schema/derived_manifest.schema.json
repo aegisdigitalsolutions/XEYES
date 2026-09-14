@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rfmapper.local/schema/1.0.0/derived_manifest.schema.json",
+  "title": "RFMapper Derived Package Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_type",
+    "export_id",
+    "created_at",
+    "algorithm_version",
+    "engine_versions",
+    "source_dataset_ids",
+    "dataset_kind",
+    "counts",
+    "generator"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "package_type": { "const": "DERIVED" },
+    "export_id": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "created_at": { "type": "string" },
+    "date_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": { "from": { "type": "string" }, "to": { "type": "string" } }
+    },
+    "algorithm_version": { "type": "string" },
+    "engine_versions": { "type": "object", "additionalProperties": { "type": "string" } },
+    "parameter_set_sha256": { "type": ["string", "null"] },
+    "random_seed": { "type": ["integer", "null"] },
+    "source_dataset_ids": {
+      "description": "Import batch or package ids this derived output was computed from. A derived package referencing data the Master has never seen is rejected on import.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "reference_model_id": { "type": ["string", "null"] },
+    "calibration_set_id": { "type": ["string", "null"] },
+    "dataset_kind": {
+      "description": "REAL for site data; SYNTHETIC for simulator output. SYNTHETIC results must never be presented as site accuracy.",
+      "type": "string",
+      "enum": ["REAL", "SYNTHETIC", "MIXED"]
+    },
+    "counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": { "name": { "type": "string" }, "version": { "type": "string" } }
+    }
+  }
+}

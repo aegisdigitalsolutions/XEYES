@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rfmapper.local/schema/1.0.0/observation.schema.json",
+  "title": "RFMapper Observation",
+  "description": "One canonical radio observation recorded by one observer at one instant. This is the immutable RAW record; nothing downstream may edit it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "observation_id",
+    "schema_version",
+    "timestamp_utc",
+    "observer_id",
+    "observer_device_type",
+    "sensor_type",
+    "radio_identifier",
+    "identifier_type"
+  ],
+  "properties": {
+    "observation_id": {
+      "description": "Globally unique identifier. UUID v4 generated on the collecting device. Primary deduplication key across every observer and every import.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "schema_version": {
+      "description": "Semantic version of this observation contract. Consumers must reject majors they do not implement.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "timestamp_utc": {
+      "description": "Instant of measurement, ISO-8601 in UTC with millisecond precision and a literal Z. Device wall clock; see metadata.clock_* keys for offset estimation.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    },
+    "observer_id": {
+      "description": "Identity of the collecting installation, e.g. OBS-04. Mandatory on every observation.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "observer_device_type": {
+      "type": "string",
+      "enum": [
+        "ANDROID_PHONE",
+        "ANDROID_TABLET",
+        "IOS_PHONE",
+        "IOS_TABLET",
+        "FIXED_OBSERVER",
+        "OTHER"
+      ]
+    },
+    "sensor_type": {
+      "description": "Which sensor produced this record. Determines which optional fields are meaningful.",
+      "type": "string",
+      "enum": [
+        "WIFI_SCAN",
+        "WIFI_ASSOCIATION",
+        "BLE",
+        "RTT",
+        "GPS",
+        "ZONE_ANCHOR",
+        "MANUAL",
+        "IMPORT"
+      ]
+    },
+    "target_device_id": {
+      "description": "Managed device this observation is attributed to. Null unless an explicit administrator enrollment rule matched. Never inferred from a randomized identifier.",
+      "type": ["string", "null"],
+      "maxLength": 64
+    },
+    "radio_identifier": {
+      "description": "Normalized identifier actually observed: lowercase colon-separated MAC, lowercase UUID, or an SSID string. Normalization is deterministic (see RadioIdentifierNormalizer).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "identifier_type": {
+      "type": "string",
+      "enum": [
+        "WIFI_BSSID",
+        "WIFI_SSID",
+        "BLE_MAC_PUBLIC",
+        "BLE_MAC_RANDOM",
+        "BLE_SERVICE_UUID",
+        "BLE_IBEACON",
+        "GNSS_FIX",
+        "OBSERVER_SELF",
+        "OTHER"
+      ]
+    },
+    "ssid": {
+      "description": "Network name where the platform exposes it. May be null even for WIFI_SCAN under restrictive permissions.",
+      "type": ["string", "null"],
+      "maxLength": 64
+    },
+    "bssid": {
+      "description": "Access point MAC, lowercase colon-separated.",
+      "type": ["string", "null"],
+      "pattern": "^([0-9a-f]{2}:){5}[0-9a-f]{2}$"
+    },
+    "ble_service_uuid": {
+      "description": "First advertised service UUID, lowercase. Full list, when present, is in metadata.ble_service_uuids.",
+      "type": ["string", "null"],
+      "maxLength": 64
+    },
+    "manufacturer_data": {
+      "description": "Uppercase hex, no separators, prefixed by the 4-hex-digit company identifier, e.g. '004C0215...'. Empty payloads are null, not an empty string.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9A-F]+$"
+    },
+    "rssi": {
+      "description": "Received signal strength in dBm as reported by the radio, uncalibrated. Normalization happens in DERIVED, never here.",
+      "type": ["integer", "null"],
+      "minimum": -127,
+      "maximum": 20
+    },
+    "tx_power": {
+      "description": "Advertised or reported transmit power in dBm.",
+      "type": ["integer", "null"],
+      "minimum": -127,
+      "maximum": 127
+    },
+    "frequency": {
+      "description": "Centre frequency in MHz.",
+      "type": ["integer", "null"],
+      "minimum": 400,
+      "maximum": 80000
+    },
+    "channel": {
+      "description": "Channel number derived from frequency by the collector.",
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 255
+    },
+    "rtt_distance_mm": {
+      "description": "Genuine Wi-Fi RTT range in millimetres. Present only when sensor_type is RTT. Must never be back-filled from an RSSI model.",
+      "type": ["integer", "null"],
+      "minimum": -30000,
+      "maximum": 200000000
+    },
+    "rtt_stddev_mm": {
+      "description": "Standard deviation of the RTT range in millimetres, as reported by the platform.",
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 200000000
+    },
+    "latitude": {
+      "type": ["number", "null"],
+      "minimum": -90,
+      "maximum": 90
+    },
+    "longitude": {
+      "type": ["number", "null"],
+      "minimum": -180,
+      "maximum": 180
+    },
+    "horizontal_accuracy": {
+      "description": "Platform-reported horizontal accuracy of the GNSS fix, in metres (68% confidence radius on Android).",
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "building_id": {
+      "description": "Building the OBSERVER was in, as configured or declared at collection time. This is observer context, not an inference about the target.",
+      "type": ["string", "null"],
+      "maxLength": 64
+    },
+    "zone_id": {
+      "description": "Zone the OBSERVER was in at collection time. Observer context, not a target estimate.",
+      "type": ["string", "null"],
+      "maxLength": 64
+    },
+    "x_coordinate": {
+      "description": "Observer site-local X in metres, when known (survey/ground-truth capture, or a fixed observer).",
+      "type": ["number", "null"]
+    },
+    "y_coordinate": {
+      "description": "Observer site-local Y in metres, when known.",
+      "type": ["number", "null"]
+    },
+    "confidence": {
+      "description": "Collection-time measurement quality in [0,1]: how much this single sample should be trusted (freshness, scan completeness, permission degradation). It is NOT a position confidence.",
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "metadata": {
+      "description": "Extensible string map. Keys listed in docs/02-observation-schema.md are reserved and have defined meanings; unknown keys must be preserved verbatim by every consumer.",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "RTT ranges only ever appear on RTT records.",
+      "if": {
+        "anyOf": [
+          { "properties": { "rtt_distance_mm": { "type": "integer" } }, "required": ["rtt_distance_mm"] },
+          { "properties": { "rtt_stddev_mm": { "type": "integer" } }, "required": ["rtt_stddev_mm"] }
+        ]
+      },
+      "then": { "properties": { "sensor_type": { "const": "RTT" } } }
+    },
+    {
+      "$comment": "A GNSS fix must carry both coordinates.",
+      "if": { "properties": { "sensor_type": { "const": "GPS" } }, "required": ["sensor_type"] },
+      "then": { "required": ["latitude", "longitude"], "properties": { "latitude": { "type": "number" }, "longitude": { "type": "number" } } }
+    },
+    {
+      "$comment": "Site-local coordinates are meaningless without a building.",
+      "if": {
+        "anyOf": [
+          { "properties": { "x_coordinate": { "type": "number" } }, "required": ["x_coordinate"] },
+          { "properties": { "y_coordinate": { "type": "number" } }, "required": ["y_coordinate"] }
+        ]
+      },
+      "then": { "required": ["building_id"], "properties": { "building_id": { "type": "string" } } }
+    }
+  ]
+}

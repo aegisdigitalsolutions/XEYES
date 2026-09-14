@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rfmapper.local/schema/1.0.0/zone_transition.schema.json",
+  "title": "RFMapper Zone Transition",
+  "description": "A committed zone entry, exit or transition. `transition_start_utc` and `transition_confirmed_utc` are kept separate so the hysteresis delay of the system itself remains measurable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transition_id",
+    "algorithm_version",
+    "engine_versions",
+    "device_id",
+    "event_type",
+    "transition_start_utc",
+    "transition_confirmed_utc",
+    "confidence",
+    "topology_status",
+    "supporting_observer_ids",
+    "supporting_estimate_ids"
+  ],
+  "properties": {
+    "transition_id": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "algorithm_version": { "type": "string" },
+    "engine_versions": { "type": "object", "additionalProperties": { "type": "string" } },
+    "device_id": { "type": "string" },
+    "event_type": { "type": "string", "enum": ["RF_ZONE_ENTER", "RF_ZONE_EXIT", "RF_ZONE_TRANSITION"] },
+    "origin_zone_id": { "type": ["string", "null"] },
+    "destination_zone_id": { "type": ["string", "null"] },
+    "transition_start_utc": { "type": "string" },
+    "transition_confirmed_utc": { "type": "string" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "topology_status": {
+      "description": "NON_ADJACENT and RESTRICTED transitions are emitted with a quality flag rather than suppressed, because the site graph may be the thing that is wrong.",
+      "type": "string",
+      "enum": ["ADJACENT", "NON_ADJACENT", "RESTRICTED", "UNKNOWN_EDGE"]
+    },
+    "supporting_observer_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "supporting_estimate_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "quality_flags": { "type": "array", "items": { "type": "string" } }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "event_type": { "const": "RF_ZONE_TRANSITION" } }, "required": ["event_type"] },
+      "then": {
+        "required": ["origin_zone_id", "destination_zone_id"],
+        "properties": { "origin_zone_id": { "type": "string" }, "destination_zone_id": { "type": "string" } }
+      }
+    },
+    {
+      "if": { "properties": { "event_type": { "const": "RF_ZONE_ENTER" } }, "required": ["event_type"] },
+      "then": { "required": ["destination_zone_id"], "properties": { "destination_zone_id": { "type": "string" } } }
+    },
+    {
+      "if": { "properties": { "event_type": { "const": "RF_ZONE_EXIT" } }, "required": ["event_type"] },
+      "then": { "required": ["origin_zone_id"], "properties": { "origin_zone_id": { "type": "string" } } }
+    }
+  ]
+}

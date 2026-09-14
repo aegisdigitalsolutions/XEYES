@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rfmapper.local/schema/1.0.0/site_model.schema.json",
+  "title": "RFMapper Site Model (REFERENCE layer snapshot)",
+  "description": "Administrator-authored reference data: coordinate frame, buildings, zones, topology, infrastructure, observers, survey points and promoted fingerprints. Snapshotted under a reference_model_id so historical derived results stay interpretable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "reference_model_id", "created_at", "frame", "buildings", "zones"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "reference_model_id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string" },
+    "notes": { "type": ["string", "null"] },
+
+    "frame": {
+      "description": "The single site-wide Cartesian frame in metres. Every x/y in the system is expressed in it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin_lat", "origin_lon", "rotation_deg"],
+      "properties": {
+        "origin_lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "origin_lon": { "type": "number", "minimum": -180, "maximum": 180 },
+        "rotation_deg": { "type": "number", "minimum": -360, "maximum": 360 },
+        "projection": { "type": "string", "enum": ["LOCAL_TANGENT_PLANE"] }
+      }
+    },
+
+    "buildings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["building_id", "name"],
+        "properties": {
+          "building_id": { "type": "string" },
+          "name": { "type": "string" },
+          "floors": { "type": "array", "items": { "type": "integer" } },
+          "outline_polygon": { "$ref": "#/$defs/polygon" },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["zone_id", "building_id", "name"],
+        "properties": {
+          "zone_id": { "type": "string" },
+          "building_id": { "type": "string" },
+          "name": { "type": "string" },
+          "floor": { "type": "integer" },
+          "zone_kind": { "type": "string", "enum": ["ROOM", "AREA", "CORRIDOR", "THRESHOLD", "OUTDOOR", "PATH"] },
+          "polygon": { "$ref": "#/$defs/polygon" },
+          "centroid_x": { "type": ["number", "null"] },
+          "centroid_y": { "type": ["number", "null"] },
+          "enclosing_radius_m": {
+            "description": "Radius of the smallest circle enclosing the polygon. Used as the reported uncertainty for a zone-centroid estimate, so coarse uncertainty derives from real site geometry rather than a constant.",
+            "type": ["number", "null"],
+            "minimum": 0
+          },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+
+    "zone_edges": {
+      "description": "The site topology graph. IMPOSSIBLE edges are authored explicitly, because 'no edge yet' and 'cannot happen' must be distinguishable.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from_zone_id", "to_zone_id", "edge_type"],
+        "properties": {
+          "from_zone_id": { "type": "string" },
+          "to_zone_id": { "type": "string" },
+          "edge_type": { "type": "string", "enum": ["DOOR", "CORRIDOR", "OUTDOOR_PATH", "STAIRS", "RESTRICTED", "IMPOSSIBLE"] },
+          "typical_traversal_s": { "type": ["number", "null"], "minimum": 0 },
+          "bidirectional": { "type": "boolean" },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+
+    "infrastructure_nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["node_id", "friendly_name", "type"],
+        "properties": {
+          "node_id": { "type": "string" },
+          "friendly_name": { "type": "string" },
+          "type": { "type": "string", "enum": ["WIFI_AP", "ZONE_ANCHOR", "RTT_ANCHOR", "BLE_ANCHOR", "OBSERVER_PHONE", "ROUTER", "OTHER"] },
+          "building_id": { "type": ["string", "null"] },
+          "floor": { "type": ["integer", "null"] },
+          "zone_id": { "type": ["string", "null"] },
+          "x": { "type": ["number", "null"] },
+          "y": { "type": ["number", "null"] },
+          "latitude": { "type": ["number", "null"] },
+          "longitude": { "type": ["number", "null"] },
+          "known_bssid": { "type": ["string", "null"], "pattern": "^([0-9a-f]{2}:){5}[0-9a-f]{2}$" },
+          "known_ble_identifier": { "type": ["string", "null"] },
+          "rtt_capable": {
+            "description": "Set true only after a genuine RTT range has been obtained from this node. Never inferred from a datasheet or a coverage specification.",
+            "type": "boolean"
+          },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+
+    "observers": {
+      "type": "array",
+      "items": { "$ref": "https://rfmapper.local/schema/1.0.0/observer.schema.json" }
+    },
+
+    "survey_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["survey_point_id", "building_id", "zone_id", "x", "y"],
+        "properties": {
+          "survey_point_id": { "type": "string" },
+          "building_id": { "type": "string" },
+          "zone_id": { "type": "string" },
+          "floor": { "type": ["integer", "null"] },
+          "x": { "type": "number" },
+          "y": { "type": "number" },
+          "label": { "type": ["string", "null"] },
+          "physical_description": {
+            "description": "How to re-occupy this exact spot. Without it, resurvey is not repeatable and drift is unmeasurable.",
+            "type": ["string", "null"]
+          },
+          "created_at_utc": { "type": ["string", "null"] },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+
+    "fingerprints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fingerprint_id", "survey_point_id", "building_id", "zone_id", "status", "sample_count", "entries"],
+        "properties": {
+          "fingerprint_id": { "type": "string" },
+          "survey_point_id": { "type": "string" },
+          "building_id": { "type": "string" },
+          "zone_id": { "type": "string" },
+          "x": { "type": ["number", "null"] },
+          "y": { "type": ["number", "null"] },
+          "status": {
+            "description": "Only an explicit administrator action moves CANDIDATE to GROUND_TRUTH. Nothing automatic may perform that transition.",
+            "type": "string",
+            "enum": ["CANDIDATE", "GROUND_TRUTH", "RETIRED"]
+          },
+          "sample_count": { "type": "integer", "minimum": 0 },
+          "session_count": { "type": ["integer", "null"], "minimum": 0 },
+          "source_survey_session_ids": { "type": "array", "items": { "type": "string" } },
+          "engine_version": { "type": ["string", "null"] },
+          "created_at_utc": { "type": ["string", "null"] },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["radio_identifier", "identifier_type", "sample_count", "visibility_probability", "rssi_median"],
+              "properties": {
+                "radio_identifier": { "type": "string" },
+                "identifier_type": { "type": "string" },
+                "sample_count": { "type": "integer", "minimum": 0 },
+                "visibility_probability": {
+                  "description": "Fraction of survey samples in which this source was seen. The absence of a source a location reliably sees is strong evidence against that location.",
+                  "type": "number", "minimum": 0, "maximum": 1
+                },
+                "rssi_median": { "type": "number" },
+                "rssi_mean": { "type": ["number", "null"] },
+                "rssi_stddev": { "type": ["number", "null"], "minimum": 0 },
+                "rssi_p10": { "type": ["number", "null"] },
+                "rssi_p90": { "type": ["number", "null"] },
+                "rssi_min": { "type": ["number", "null"] },
+                "rssi_max": { "type": ["number", "null"] },
+                "temporal_stability": { "type": ["number", "null"] }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "observer_calibration": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["observer_id", "rssi_offset_db"],
+        "properties": {
+          "observer_id": { "type": "string" },
+          "rssi_offset_db": { "type": "number" },
+          "measured_at_utc": { "type": ["string", "null"] },
+          "sample_count": { "type": ["integer", "null"], "minimum": 0 },
+          "spread_db": {
+            "description": "Per-source spread of the measured offset. A large spread means this is antenna-pattern difference rather than a scalar offset, and the offset must not be applied.",
+            "type": ["number", "null"], "minimum": 0
+          },
+          "method": { "type": ["string", "null"] },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "polygon": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["x", "y"],
+        "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+      }
+    }
+  }
+}

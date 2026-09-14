@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rfmapper.local/schema/1.0.0/manifest.schema.json",
+  "title": "RFMapper Observation Package Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_type",
+    "export_id",
+    "observer_id",
+    "created_at",
+    "export_kind",
+    "observation_count",
+    "app_version",
+    "generator"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "package_type": { "const": "OBSERVATIONS" },
+    "export_id": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "observer_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "created_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$" },
+    "export_kind": { "type": "string", "enum": ["DAY", "SESSION", "RANGE"] },
+    "date_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" }
+      }
+    },
+    "observation_count": { "type": "integer", "minimum": 0 },
+    "first_observation": { "type": ["string", "null"] },
+    "last_observation": { "type": ["string", "null"] },
+    "app_version": { "type": "string" },
+    "platform": { "type": "string" },
+    "os_version": { "type": "string" },
+    "device_model": { "type": "string" },
+    "installation_id": { "type": ["string", "null"] },
+    "session_ids": { "type": "array", "items": { "type": "string" } },
+    "counts_by_sensor_type": {
+      "description": "Per-sensor row counts, so the import preview can summarise without parsing every row and can detect a manifest/content mismatch.",
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "ground_truth_count": { "type": "integer", "minimum": 0 },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "A non-empty package must declare its first and last observation timestamps.",
+      "if": { "properties": { "observation_count": { "minimum": 1 } }, "required": ["observation_count"] },
+      "then": {
+        "required": ["first_observation", "last_observation"],
+        "properties": {
+          "first_observation": { "type": "string" },
+          "last_observation": { "type": "string" }
+        }
+      }
+    }
+  ]
+}

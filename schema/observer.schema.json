@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rfmapper.local/schema/1.0.0/observer.schema.json",
+  "title": "RFMapper Observer Identity",
+  "description": "Identity and capability declaration for one Collector installation. The capability lists are load-bearing: they let a consumer distinguish 'this observer cannot see Wi-Fi' from 'no access points were present'.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "observer_id",
+    "friendly_name",
+    "observer_device_type",
+    "platform",
+    "app_version",
+    "capabilities"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "observer_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "friendly_name": { "type": "string", "maxLength": 128 },
+    "observer_device_type": {
+      "type": "string",
+      "enum": ["ANDROID_PHONE", "ANDROID_TABLET", "IOS_PHONE", "IOS_TABLET", "FIXED_OBSERVER", "OTHER"]
+    },
+    "building_id": { "type": ["string", "null"], "maxLength": 64 },
+    "default_zone_id": { "type": ["string", "null"], "maxLength": 64 },
+    "device_model": { "type": ["string", "null"] },
+    "manufacturer": { "type": ["string", "null"] },
+    "platform": { "type": "string", "enum": ["android", "ios", "other"] },
+    "os_version": { "type": ["string", "null"] },
+    "app_version": { "type": "string" },
+    "installation_id": { "type": ["string", "null"] },
+    "capabilities": {
+      "description": "Sensor types this observer is actually able to produce.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["WIFI_SCAN", "WIFI_ASSOCIATION", "BLE", "RTT", "GPS"]
+      },
+      "uniqueItems": true
+    },
+    "unsupported": {
+      "description": "Sensor types this observer explicitly cannot produce, whether through hardware, OS policy or denied permission.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["WIFI_SCAN", "WIFI_ASSOCIATION", "BLE", "RTT", "GPS"]
+      },
+      "uniqueItems": true
+    },
+    "x_coordinate": { "type": ["number", "null"] },
+    "y_coordinate": { "type": ["number", "null"] },
+    "fixed_observer": {
+      "description": "True when x/y are a trusted measured location, which upgrades this observer's samples to reference-quality evidence in fusion.",
+      "type": "boolean"
+    },
+    "notes": { "type": ["string", "null"] }
+  },
+  "allOf": [
+    {
+      "$comment": "A fixed observer is only useful if its position is actually known.",
+      "if": { "properties": { "fixed_observer": { "const": true } }, "required": ["fixed_observer"] },
+      "then": {
+        "required": ["x_coordinate", "y_coordinate", "building_id"],
+        "properties": {
+          "x_coordinate": { "type": "number" },
+          "y_coordinate": { "type": "number" },
+          "building_id": { "type": "string" }
+        }
+      }
+    }
+  ]
+}
