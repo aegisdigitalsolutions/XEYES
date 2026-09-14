@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      The radio permissions and hardware declarations are inherited from radio-android's manifest,
+      so this file adds only what the application layer itself needs. Keeping them there means the
+      permission set and the code in RadioPermissions cannot drift apart.
+    -->
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!--
+      Requested only on explicit user action from the onboarding screen. Multi-hour unattended
+      sessions genuinely need it — several OEM battery managers suspend a non-exempt foreground
+      service — but demanding it for a ten-minute walk test would be disproportionate.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application
+        android:name=".CollectorApplication"
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.RFMapperCollector">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.RFMapperCollector">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          foregroundServiceType=location is required from API 34 for a service that accesses
+          location while backgrounded, and Wi-Fi/BLE scanning counts as location access. Omitting it
+          makes the service throw at start on 34+ rather than degrade.
+        -->
+        <service
+            android:name=".collection.CollectionService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+    </application>
+
+</manifest>

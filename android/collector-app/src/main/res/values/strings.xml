@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RFMapper Collector</string>
+    <string name="notification_channel_name">Collection session</string>
+    <string name="notification_channel_description">Shows live counters while a collection session is running.</string>
+</resources>
