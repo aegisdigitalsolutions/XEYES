@@ -31,10 +31,17 @@ identifying arbitrary people or devices:
 |---|---|---|
 | **Collector** | [`android/collector-app`](android/collector-app) | Field app. `SCAN -> RECORD -> STORE -> EXPORT`. Offline, no server. |
 | **Master** | [`android/master-app`](android/master-app) | Owner app. Observation database, registries, site model, import, survey, history. |
-| **Positioning Lab** | [`positioning-lab`](positioning-lab) | Python statistical engine. RAW + REFERENCE -> DERIVED estimates. Never mutates RAW. |
+| **Positioning Lab** | [`positioning-lab`](positioning-lab) | Python statistical engine. RAW + REFERENCE -> DERIVED estimates. Never mutates RAW. [README](positioning-lab/README.md) |
 
 The three components are coupled only by the **versioned file contract** in [`schema/`](schema).
 Nothing shares a process, a database, or a network connection.
+
+Because nothing shares a process, no test can check those contracts by calling one component from
+another. What can be checked is the artefact: one side writes a file, the file is committed under
+[`contract/`](contract), and the other side's suite reads it. The Kotlin suite writes the site
+model, the device registry and the observation packages; the Lab's suite reads them, runs the
+pipeline and writes the derived package; the Kotlin suite imports that back. A format change that
+breaks a consumer fails a test instead of failing in the field.
 
 ## Data layers
 
@@ -52,6 +59,7 @@ Any `DERIVED` result must be reproducible from `RAW + REFERENCE` alone. Swapping
 ```
 docs/               First engineering deliverables (read these before the code)
 schema/             The versioned cross-component contract (JSON Schema + CSV spec)
+contract/           Committed fixtures each side writes and the other side's tests read
 android/            Gradle multi-module build
   core-model/         Pure-JVM canonical model, codecs, validation  (no Android deps)
   core-export/        Pure-JVM export package writer + checksums
@@ -81,7 +89,7 @@ cd android && ./gradlew :core-model:test :core-export:test :core-import:test
 # Android apps (requires an Android SDK with platform 35)
 cd android && ./gradlew :collector-app:assembleDebug :master-app:assembleDebug
 
-# Positioning Lab
+# Positioning Lab (see positioning-lab/README.md for the pipeline and the CLI)
 cd positioning-lab && pip install -e '.[dev]' && pytest
 python -m rfmapper_lab.cli demo --out /tmp/rfmapper-demo   # synthetic end-to-end pipeline
 ```
@@ -92,9 +100,9 @@ python -m rfmapper_lab.cli demo --out /tmp/rfmapper-demo   # synthetic end-to-en
 |---|---|
 | 0 — First engineering deliverables | Complete |
 | 1 — Android Collector | Implemented; **requires validation on real hardware** |
-| 2 — Master data engine (registries, import, dedup, browser) | Implemented |
+| 2 — Master data engine (registries, import, dedup, browser) | Implemented, including reference export for the Lab and derived import back |
 | 3 — Survey / site map / fingerprint collection | Survey capture + fingerprint build implemented; interactive map drawing not started |
-| 4 — Positioning Lab inference | Implemented (baselines + fusion + uncertainty + movement) |
+| 4 — Positioning Lab inference | Implemented (baselines, fusion, uncertainty, movement, benchmark harness) |
 | 5 — Visualization | Not started |
 | 6 — iOS | Not started (capability matrix delivered) |
 | 7 — Optional future work | Not started |
@@ -102,3 +110,8 @@ python -m rfmapper_lab.cli demo --out /tmp/rfmapper-demo   # synthetic end-to-en
 Accuracy numbers have **not** been measured on this site. The benchmark harness reports numbers for
 the synthetic simulator only; see
 [`docs/15-assumptions-requiring-validation.md`](docs/15-assumptions-requiring-validation.md).
+
+Until a real survey has been collected and benchmarked, every coordinate the Lab emits carries the
+`UNVALIDATED_UNCERTAINTY` flag and an error bar derived from geometry rather than measurement. That
+is the intended state, not a gap to be papered over: `rfmapper-lab benchmark` on real ground truth
+is what replaces it.
