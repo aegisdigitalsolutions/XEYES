@@ -1,0 +1,31 @@
+# Build output
+build/
+.gradle/
+*.apk
+*.aab
+
+# Machine-specific toolchain paths. Every developer's SDK lives somewhere else.
+local.properties
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+.coverage
+htmlcov/
+
+# Working data. Real observations and derived estimates never belong in version control.
+/data/
+/out/
+*.zip
+
+# Editors
+.idea/
+*.iml
+.DS_Store
