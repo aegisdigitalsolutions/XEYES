@@ -31,9 +31,18 @@ class PackageValidator(
     fun validate(reader: PackageReader, existing: ExistingIdLookup): ImportPreview {
         val issues = mutableListOf<ImportIssue>()
 
+        // The digest of the file itself, established before anything is inspected. Every outcome
+        // reports it, including a rejection: "which file was this?" is exactly the question an
+        // administrator asks about a package that failed, and it is also what lets the Master
+        // recognise the same file on a later attempt.
+        val packageSha = reader.packageSha256()
+
         // 1. Structure.
         val entryNames = runCatching { reader.entryNames() }.getOrElse {
-            return failed(issues + ImportIssue(ImportErrorCode.MALFORMED_PACKAGE, it.message ?: "unreadable"))
+            return failed(
+                issues + ImportIssue(ImportErrorCode.MALFORMED_PACKAGE, it.message ?: "unreadable"),
+                packageSha256 = packageSha,
+            )
         }
         val missing = ExportPackage.REQUIRED_ENTRIES.filter { it !in entryNames }
         if (missing.isNotEmpty()) {
@@ -42,6 +51,7 @@ class PackageValidator(
                     ImportErrorCode.MISSING_ENTRY,
                     "package is missing required ${missing.joinToString()}",
                 ),
+                packageSha256 = packageSha,
             )
         }
 
@@ -58,6 +68,7 @@ class PackageValidator(
                     ImportErrorCode.MALFORMED_PACKAGE,
                     "manifest.json is not valid: ${it.message}",
                 ),
+                packageSha256 = packageSha,
             )
         }
 
@@ -69,6 +80,7 @@ class PackageValidator(
                         "(supports major ${SchemaVersion.SUPPORTED_MAJOR})",
                 ),
                 manifest,
+                packageSha256 = packageSha,
             )
         }
         if (manifest.packageType != PackageType.OBSERVATIONS) {
@@ -78,6 +90,7 @@ class PackageValidator(
                     "expected an OBSERVATIONS package, got ${manifest.packageType}",
                 ),
                 manifest,
+                packageSha256 = packageSha,
             )
         }
 
@@ -102,7 +115,7 @@ class PackageValidator(
                 )
             }
         }
-        if (issues.any { it.blocking }) return failed(issues, manifest)
+        if (issues.any { it.blocking }) return failed(issues, manifest, packageSha256 = packageSha)
 
         // 6 & 7. Observer identity and enrollment.
         val observer = runCatching {
@@ -117,6 +130,7 @@ class PackageValidator(
                     "observer.json is not valid: ${it.message}",
                 ),
                 manifest,
+                packageSha256 = packageSha,
             )
         }
         if (observer.observerId != manifest.observerId) {
@@ -131,10 +145,7 @@ class PackageValidator(
                 "observer ${manifest.observerId} is not enrolled: enroll it before importing its data",
             )
         }
-        if (issues.any { it.blocking }) return failed(issues, manifest, observer)
-
-        // 5. Byte-identical re-import. Advisory: deduplication makes it harmless.
-        val packageSha = reader.packageSha256()
+        if (issues.any { it.blocking }) return failed(issues, manifest, observer, packageSha)
 
         // 8 & 9. Rows.
         val csvOutcome = parseCsv(reader.bytes(ExportPackage.OBSERVATIONS_CSV)!!, manifest, issues)

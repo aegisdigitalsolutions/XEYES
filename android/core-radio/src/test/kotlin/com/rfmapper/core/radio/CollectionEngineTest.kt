@@ -98,6 +98,40 @@ class CollectionEngineTest {
     }
 
     @Test
+    fun `a full buffer sacrifices a ble advertisement rather than a wifi scan`() = runTest {
+        val writer = RecordingWriter()
+        val engine = engine(writer, batchSize = 1_000, bufferCapacity = 3)
+        engine.start(TestRadio.session())
+
+        repeat(3) { engine.submit(TestRadio.bleSample(rssi = -80 - it)) }
+        // One more advertisement is worth little; a scan arrives only at the platform's cadence.
+        assertTrue(engine.submit(TestRadio.wifiSample()), "the Wi-Fi scan must be admitted")
+
+        engine.stop()
+        val kinds = writer.written.map { it.sensorType }
+        assertTrue(com.rfmapper.core.model.SensorType.WIFI_SCAN in kinds)
+        assertEquals(2, kinds.count { it == com.rfmapper.core.model.SensorType.BLE })
+    }
+
+    @Test
+    fun `a wifi scan is never dropped to make room for another wifi scan`() = runTest {
+        val writer = RecordingWriter()
+        val engine = engine(writer, batchSize = 1_000, bufferCapacity = 2)
+        engine.start(TestRadio.session())
+
+        assertTrue(engine.submit(TestRadio.wifiSample(bssid = "AA:BB:CC:11:22:01")))
+        assertTrue(engine.submit(TestRadio.wifiSample(bssid = "AA:BB:CC:11:22:02")))
+        assertFalse(
+            engine.submit(TestRadio.wifiSample(bssid = "AA:BB:CC:11:22:03")),
+            "with no BLE to sacrifice, the newest sample is the one that goes",
+        )
+
+        engine.stop()
+        assertEquals(2, writer.written.size)
+        assertEquals("aa:bb:cc:11:22:01", writer.written.first().radioIdentifier)
+    }
+
+    @Test
     fun `a transient write failure costs a retry rather than the data`() = runTest {
         val writer = RecordingWriter(failuresRemaining = 1)
         val engine = engine(writer, batchSize = 3)

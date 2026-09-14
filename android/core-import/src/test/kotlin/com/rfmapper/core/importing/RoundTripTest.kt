@@ -175,6 +175,27 @@ class RoundTripTest {
     }
 
     @Test
+    fun `a rejected package still reports which file it was`() {
+        // The Master keys its import history on this digest, under a unique index. A rejection that
+        // reported no digest would make two different bad packages indistinguishable — and would
+        // collide with each other in storage.
+        val zip = exportZip(TestData.day())
+        val rejected = preview(zip, enrolled = emptySet())
+
+        assertFalse(rejected.canImport)
+        assertEquals(Sha256.hex(zip), rejected.packageSha256)
+    }
+
+    @Test
+    fun `a package missing an entry still reports which file it was`() {
+        val zip = TestZip.removeEntry(exportZip(TestData.day()), ExportPackage.OBSERVER)
+        val result = preview(zip)
+
+        assertFalse(result.canImport)
+        assertEquals(Sha256.hex(zip), result.packageSha256)
+    }
+
+    @Test
     fun `a tampered csv fails the package checksum`() {
         val zip = exportZip(TestData.day())
         val corrupted = TestZip.replaceEntry(zip, ExportPackage.OBSERVATIONS_CSV) { csv ->

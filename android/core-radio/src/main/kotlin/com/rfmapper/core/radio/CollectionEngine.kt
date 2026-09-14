@@ -33,9 +33,12 @@ fun interface ObservationWriter {
  *    transaction each would make the database the bottleneck and the battery the victim. Batches
  *    flush on size or on a deadline, whichever comes first, so a quiet environment still persists
  *    promptly instead of holding data in RAM until the process dies.
- * 2. **Back-pressure that counts what it drops.** When the writer cannot keep up the engine drops
- *    the oldest samples and *records the number dropped* into the session summary. Silently losing
- *    samples would leave a coverage gap indistinguishable from a quiet radio environment.
+ * 2. **Back-pressure that drops the cheapest sample and counts it.** When the writer cannot keep up,
+ *    the oldest *BLE* sample is sacrificed first: advertisements arrive at hundreds per second and
+ *    one more is worth little, whereas a Wi-Fi scan arrives at the platform's scan cadence and is
+ *    effectively irreplaceable. Whatever is dropped is counted into the session summary, because
+ *    silently losing samples leaves a coverage gap indistinguishable from a quiet radio
+ *    environment.
  * 3. **A gap detector.** If no sample is written for longer than [GAP_THRESHOLD_MILLIS] while the
  *    session is supposedly running, the summary flags a suspected service kill. OEM battery
  *    managers do this routinely, and an unexplained six-hour hole in the data is worth far less
@@ -155,17 +158,7 @@ class CollectionEngine(
             return false
         }
 
-        val accepted = mutex.withLock {
-            if (pending.size >= bufferCapacity) {
-                counters.recordDropped()
-                false
-            } else {
-                pending += observation
-                pendingCount.set(pending.size)
-                counters.record(observation)
-                true
-            }
-        }
+        val accepted = mutex.withLock { admit(observation) }
 
         if (accepted) {
             _recent.tryEmit(observation)
@@ -173,6 +166,33 @@ class CollectionEngine(
         }
         publishStatus()
         return accepted
+    }
+
+    /**
+     * Buffers [observation], making room by discarding a BLE sample if the buffer is full and the
+     * new sample is worth more than one. Must be called holding [mutex].
+     *
+     * @return false when the new observation itself was dropped.
+     */
+    private fun admit(observation: Observation): Boolean {
+        if (pending.size >= bufferCapacity) {
+            val sacrificeable = if (observation.sensorType == SensorType.BLE) {
+                -1
+            } else {
+                pending.indexOfFirst { it.sensorType == SensorType.BLE }
+            }
+            if (sacrificeable < 0) {
+                counters.recordDropped()
+                return false
+            }
+            pending.removeAt(sacrificeable)
+            counters.recordDropped()
+        }
+
+        pending += observation
+        pendingCount.set(pending.size)
+        counters.record(observation)
+        return true
     }
 
     /** Writes any buffered observations. Called on flush deadlines, on stop, and before export. */
