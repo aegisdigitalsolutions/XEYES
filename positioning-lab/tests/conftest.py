@@ -7,6 +7,8 @@ pipeline does with it rather than about the generator.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from rfmapper_lab.models import DatasetKind
@@ -26,6 +28,30 @@ SMALL_SITE = SimulationSpec(
     walk_steps=30,
     devices=2,
 )
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--rfmapper-write-contract",
+        action="store_true",
+        default=False,
+        help="rewrite the cross-language fixtures under contract/ instead of comparing against "
+        "them. A change there is a change to a published file format, so read the diff.",
+    )
+
+
+@pytest.fixture(scope="session")
+def contract_dir() -> Path:
+    """``contract/`` at the repository root, found by marker rather than by relative guess."""
+    for candidate in [Path(__file__).resolve(), *Path(__file__).resolve().parents]:
+        if (candidate / "docs" / "00-first-deliverables-index.md").is_file():
+            return candidate / "contract"
+    raise AssertionError(f"could not locate the repository root from {__file__}")
+
+
+@pytest.fixture(scope="session")
+def writing_contract(request: pytest.FixtureRequest) -> bool:
+    return bool(request.config.getoption("--rfmapper-write-contract"))
 
 
 @pytest.fixture(scope="session")

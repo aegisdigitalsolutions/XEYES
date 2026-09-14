@@ -13,8 +13,10 @@ import com.rfmapper.core.model.RfMapperJson
 import com.rfmapper.core.model.SiteFrame
 import com.rfmapper.core.model.SiteModel
 import com.rfmapper.data.room.DerivedPackageImporter
+import com.rfmapper.data.room.DeviceRegistryIo
 import com.rfmapper.data.room.ObservationRepository
 import com.rfmapper.data.room.PackageImporter
+import com.rfmapper.data.room.ReferenceRepository
 import com.rfmapper.data.room.RfMapperDatabase
 import com.rfmapper.data.room.SiteModelIo
 import com.rfmapper.master.importing.ImportCoordinator
@@ -72,6 +74,16 @@ class ImportCoordinatorTest {
                 observers = db.observerDao(),
                 fingerprints = db.fingerprintDao(),
                 calibration = db.observerCalibrationDao(),
+            ),
+            deviceRegistry = DeviceRegistryIo(
+                ReferenceRepository(
+                    devices = db.managedDeviceDao(),
+                    infrastructure = db.infrastructureDao(),
+                    observers = db.observerDao(),
+                    site = db.siteModelDao(),
+                    fingerprints = db.fingerprintDao(),
+                    calibration = db.observerCalibrationDao(),
+                ),
             ),
             settings = settings,
         )

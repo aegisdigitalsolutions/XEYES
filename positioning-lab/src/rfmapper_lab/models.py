@@ -448,6 +448,16 @@ class ObserverCalibration:
         return self.spread_db is None or self.spread_db <= max_spread_db
 
 
+#: Sensors that need more than the capability named after them. Reading the observer's own
+#: association needs the Wi-Fi radio as well as permission to ask about the connection, so an
+#: observer that cannot scan cannot report an association either — and one that declares
+#: WIFI_ASSOCIATION unsupported has said so directly, which used to be overlooked because only the
+#: underlying WIFI_SCAN was consulted.
+_REQUIRED_CAPABILITIES: dict["SensorType", tuple[str, ...]] = {
+    SensorType.WIFI_ASSOCIATION: ("WIFI_ASSOCIATION", "WIFI_SCAN"),
+}
+
+
 @dataclass(frozen=True, slots=True)
 class Observer:
     observer_id: str
@@ -467,11 +477,17 @@ class Observer:
         An observer that cannot scan Wi-Fi reporting no Wi-Fi means *this observer cannot see
         Wi-Fi*, not *no access points were present*, and the visibility statistics must not count
         it as a negative observation.
+
+        ``unsupported`` is decisive and ``capabilities`` is a closed declaration: a capability the
+        observer did not claim is one it does not have. Both matter, because the two lists answer
+        different questions — "I checked, and I cannot" against "here is what I can".
         """
-        name = "WIFI_SCAN" if sensor is SensorType.WIFI_ASSOCIATION else sensor.value
-        if name in self.unsupported:
+        required = _REQUIRED_CAPABILITIES.get(sensor, (sensor.value,))
+        if any(name in self.unsupported for name in required):
             return False
-        return not self.capabilities or name in self.capabilities
+        if not self.capabilities:
+            return True
+        return all(name in self.capabilities for name in required)
 
 
 @dataclass(frozen=True, slots=True)
