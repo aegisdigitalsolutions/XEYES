@@ -140,7 +140,7 @@ def build_vectors(
                 if abs(age) > window_ms(row.sensor_type, params.fusion):
                     continue
                 measurements.append(
-                    _measurement(row, abs(age), model, params, measures_device=heard)
+                    measurement_of(row, abs(age), model, params, measures_device=heard)
                 )
 
             if measurements:
@@ -178,13 +178,19 @@ def signal_source_key(
     return normalize_identifier(observation.radio_identifier, observation.identifier_type)
 
 
-def _measurement(
+def measurement_of(
     observation: Observation,
     age_ms: int,
     model: ReferenceModel,
     params: ParameterSet,
     measures_device: bool,
 ) -> Measurement:
+    """One row as a window member: normalized, keyed into signal space, framed.
+
+    Shared with the benchmark harness, which assembles vectors from held-out survey samples. A
+    second copy of this conversion would let the harness measure something the pipeline never
+    computes.
+    """
     return Measurement(
         observer_id=observation.observer_id,
         radio_identifier=signal_source_key(observation, model, measures_device),

@@ -7,6 +7,7 @@ from .windows import (
     build_vectors,
     frame_weights,
     fuse_zones,
+    measurement_of,
     signal_source_key,
     split_by_frame,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "build_vectors",
     "frame_weights",
     "fuse_zones",
+    "measurement_of",
     "signal_source_key",
     "split_by_frame",
 ]

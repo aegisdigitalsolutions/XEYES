@@ -182,10 +182,16 @@ class ZoneWeightedKnnV1:
 class ZoneCosineV1:
     """Cosine similarity over shared sources.
 
-    Scale-invariant, which is exactly the uncalibrated-chipset failure mode: a device reporting
-    every RSSI 6 dB low still points in the same direction in signal space. dBm values are shifted
-    positive first, because cosine similarity between two vectors of negative numbers is dominated
-    by the shared offset rather than by the pattern.
+    Invariant to a *multiplicative* rescaling of the shifted vector, which is why it is a candidate
+    for the uncalibrated-chipset failure mode. The invariance is only approximate for the offset
+    that failure actually produces: a chipset reporting every RSSI 6 dB low shifts the vector
+    additively, and an additive shift changes direction in the shifted-positive space unless every
+    component is far from the floor. The benchmark bears this out — on a held-out session from an
+    uncorrected observer this method does not hold up as well as the docstring's intuition suggests,
+    which is the kind of claim the harness exists to settle.
+
+    dBm values are shifted positive first, because cosine similarity between two vectors of
+    negative numbers is dominated by the shared offset rather than by the pattern.
     """
 
     id = "zone_cosine_v1"

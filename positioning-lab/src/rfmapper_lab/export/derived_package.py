@@ -24,7 +24,6 @@ from .serialize import (
     TRANSITION_COLUMNS,
     estimate_csv_row,
     estimate_to_dict,
-    flag_to_dict,
     movement_to_dict,
     transition_csv_row,
     transition_to_dict,

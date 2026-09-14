@@ -36,6 +36,11 @@ NOISE_DB = 2.2
 RSSI_FLOOR = -96
 RSSI_CEILING = -28
 
+#: Ranging reach, and only within the anchor's own building. FTM needs a clear enough path that a
+#: range through an exterior wall is the exception rather than the rule, so a simulator that ranged
+#: across buildings would hand the ranged strategy a coverage figure no deployment will see.
+RTT_RANGE_M = 30.0
+
 
 @dataclass(frozen=True, slots=True)
 class SimulationSpec:
@@ -518,6 +523,15 @@ def _survey_observations(
                     rssi = _rssi(rng, distance, walls, bias + float(rng.normal(0.0, 1.5)))
                     if rssi <= RSSI_FLOOR:
                         continue
+                    truth_metadata = {
+                        "sample_kind": "GROUND_TRUTH",
+                        "survey_point_id": point["survey_point_id"],
+                        "survey_session_id": session_id,
+                        "survey_operator": "operator-1",
+                        "survey_conditions": "OCCUPANCY_LOW",
+                        "result_freshness": "FRESH",
+                        "session_id": session_id,
+                    }
                     rows.append(
                         _observation(
                             timestamp=timestamp,
@@ -529,17 +543,33 @@ def _survey_observations(
                             zone_id=point["zone_id"],
                             x=point["x"],
                             y=point["y"],
-                            metadata={
-                                "sample_kind": "GROUND_TRUTH",
-                                "survey_point_id": point["survey_point_id"],
-                                "survey_session_id": session_id,
-                                "survey_operator": "operator-1",
-                                "survey_conditions": "OCCUPANCY_LOW",
-                                "result_freshness": "FRESH",
-                                "session_id": session_id,
-                            },
+                            metadata=truth_metadata,
                         )
                     )
+                    if source["rtt"] and walls == 0 and distance < RTT_RANGE_M:
+                        # A survey capture from an RTT-capable handset ranges the anchors it can
+                        # reach. Without these rows the benchmark's ranged candidate has nothing
+                        # held out to score against, and its coverage column reads zero for a
+                        # reason that is an artefact of the simulator rather than of the method.
+                        rows.append(
+                            _observation(
+                                timestamp=timestamp,
+                                observer_id=observer_id,
+                                identifier=source["identifier"],
+                                is_ble=False,
+                                rssi=rssi,
+                                building_id=point["building_id"],
+                                zone_id=point["zone_id"],
+                                x=point["x"],
+                                y=point["y"],
+                                sensor=SensorType.RTT,
+                                rtt_distance_mm=int(
+                                    max(0.3, distance + float(rng.normal(0.0, 0.9))) * 1000
+                                ),
+                                rtt_stddev_mm=int(abs(rng.normal(900, 200))),
+                                metadata={**truth_metadata, "rtt_num_successful": "7"},
+                            )
+                        )
     return tuple(rows)
 
 
@@ -662,7 +692,7 @@ def _live_observations(
                     },
                 )
             )
-            if source["rtt"] and distance < 45.0:
+            if source["rtt"] and walls == 0 and distance < RTT_RANGE_M:
                 error = float(rng.normal(0.0, 0.9))
                 rows.append(
                     _observation(

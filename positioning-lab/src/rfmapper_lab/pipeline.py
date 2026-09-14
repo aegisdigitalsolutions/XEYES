@@ -205,6 +205,20 @@ def run_pipeline(dataset: Dataset, config: PipelineConfig = PipelineConfig()) ->
     )
 
 
+@dataclass(frozen=True, slots=True)
+class Inference:
+    """One live vector's full inference, not only the row that leaves the building.
+
+    The benchmark needs the ranked zone list to measure top-2 accuracy and the placement to
+    attribute a method, and neither survives onto :class:`PositionEstimate`. Returning them here
+    keeps the harness measuring the pipeline rather than a reimplementation of it.
+    """
+
+    estimate: PositionEstimate | None
+    zones: ZoneResult
+    placement: Placement | None
+
+
 def estimate_for_vector(
     vector: LiveVector,
     classifier,
@@ -216,6 +230,30 @@ def estimate_for_vector(
     previous_zone_id: str | None,
     per_zone_counts: Mapping[str, int],
 ) -> PositionEstimate | None:
+    return infer(
+        vector=vector,
+        classifier=classifier,
+        fingerprints=fingerprints,
+        model=model,
+        config=config,
+        computed_at_utc=computed_at_utc,
+        source_dataset_ids=source_dataset_ids,
+        previous_zone_id=previous_zone_id,
+        per_zone_counts=per_zone_counts,
+    ).estimate
+
+
+def infer(
+    vector: LiveVector,
+    classifier,
+    fingerprints: FingerprintSet,
+    model: ReferenceModel,
+    config: PipelineConfig,
+    computed_at_utc: str,
+    source_dataset_ids: Sequence[str],
+    previous_zone_id: str | None,
+    per_zone_counts: Mapping[str, int],
+) -> Inference:
     """Phases 5 to 8 for one live vector.
 
     Exposed separately because the benchmark harness evaluates exactly this function against
@@ -236,7 +274,7 @@ def estimate_for_vector(
     if placement is None:
         placement = _presence_only(vector, model)
         if placement is None:
-            return None
+            return Inference(estimate=None, zones=zones, placement=None)
 
     best = zones.best
     building_id, zone_id = _location_ids(placement, best, model, vector)
@@ -288,7 +326,7 @@ def estimate_for_vector(
         tier = PrecisionTier.APPROXIMATE_POSITION
         flags.append("RANGED_CLAIM_WITHOUT_RTT")
 
-    return PositionEstimate(
+    estimate = PositionEstimate(
         estimate_id=derive_id(
             "estimate", config.algorithm_version, vector.device_id, vector.timestamp_utc
         ),
@@ -314,6 +352,7 @@ def estimate_for_vector(
         calibration_set_id=model.calibration_set_id,
         quality_flags=tuple(sorted(set(flags))),
     )
+    return Inference(estimate=estimate, zones=zones, placement=placement)
 
 
 def _location_ids(

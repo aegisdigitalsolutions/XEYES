@@ -15,6 +15,13 @@ is stamped ``dataset_kind: SYNTHETIC``.
 
 from __future__ import annotations
 
+from .packages import WrittenPackage, write_packages
 from .site import SimulatedSite, SimulationSpec, simulate
 
-__all__ = ["SimulatedSite", "SimulationSpec", "simulate"]
+__all__ = [
+    "SimulatedSite",
+    "SimulationSpec",
+    "WrittenPackage",
+    "simulate",
+    "write_packages",
+]
