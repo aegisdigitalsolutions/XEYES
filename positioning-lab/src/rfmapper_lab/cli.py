@@ -28,6 +28,7 @@ from .benchmark import (
     Baseline,
     check,
     default_candidates,
+    empirical_error_model,
     format_report,
     movement_metrics,
     operating_point,
@@ -279,6 +280,7 @@ def _benchmark(args: argparse.Namespace) -> int:
         path = args.out / "algorithm_report.json"
         path.write_text(dumps(report.as_dict()), encoding="utf-8")
         print(f"\nWrote {path}")
+        _write_empirical_error_model(report, args.out)
 
     status = 0
     if args.baseline:
@@ -417,6 +419,7 @@ def _demo(args: argparse.Namespace) -> int:
         (out / "algorithm_report.json").write_text(
             dumps(algorithm_report), encoding="utf-8"
         )
+        _write_empirical_error_model(report, out)
 
     package = write_derived_package(result, derived_dir, algorithm_report=algorithm_report)
     print(f"\nWrote {package.path}")
@@ -472,6 +475,45 @@ def _print_ingest(dataset: Dataset, problems: Sequence) -> None:
         counted[issue.problem.value] = counted.get(issue.problem.value, 0) + 1
     for code, count in sorted(counted.items()):
         print(f"  {code}: {count}")
+
+
+#: The file name `run --empirical` is pointed at. Written beside the report rather than folded into
+#: it, because feeding a measurement back into the next run is a deliberate act and should look like
+#: one on the command line.
+EMPIRICAL_ERROR_MODEL = "empirical_error_model.json"
+
+
+def _write_empirical_error_model(report, out: Path) -> None:
+    """Emit the measured error model, or say plainly why there is none.
+
+    Without this file the benchmark measures per-method error and then discards it, leaving
+    ``--empirical`` satisfiable only by a hand-written JSON document and every estimate flagged
+    ``UNVALIDATED_UNCERTAINTY`` indefinitely.
+    """
+    model = empirical_error_model(report)
+    if model is None:
+        print(
+            f"\nNo {EMPIRICAL_ERROR_MODEL} written: no placement method had enough located "
+            f"held-out samples to measure a P68 error. Uncertainty stays geometric, and estimates "
+            f"will keep the UNVALIDATED_UNCERTAINTY flag.",
+            file=sys.stderr,
+        )
+        return
+
+    path = out / EMPIRICAL_ERROR_MODEL
+    path.write_text(dumps(model.as_dict()), encoding="utf-8")
+    print(f"Wrote {path}")
+    for method, p68 in sorted(model.p68_by_method.items()):
+        print(f"  {method}: P68 {p68:.2f} m")
+    if model.validated:
+        print(f"  feed it back with: rfmapper-lab run ... --empirical {path}")
+    else:
+        # Synthetic measurements are usable for development and must never be reported as accuracy
+        # for a real site, so the flag survives the feedback loop by design.
+        print(
+            f"  measured on {model.dataset_kind} data, so estimates using it stay flagged "
+            f"UNVALIDATED_UNCERTAINTY"
+        )
 
 
 def _params(args: argparse.Namespace) -> ParameterSet:

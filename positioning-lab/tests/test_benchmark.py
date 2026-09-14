@@ -17,8 +17,12 @@ import pytest
 
 from rfmapper_lab.benchmark import (
     Baseline,
+    BenchmarkReport,
     Candidate,
+    CandidateResult,
+    SessionSplit,
     default_candidates,
+    empirical_error_model,
     format_report,
     run_benchmark,
 )
@@ -39,8 +43,11 @@ from rfmapper_lab.benchmark.splits import (
     split_sessions,
     training_observations,
 )
+from rfmapper_lab.jsonio import dumps
 from rfmapper_lab.models import DatasetKind, PositionEstimate, PrecisionTier
 from rfmapper_lab.params import DEFAULTS
+from rfmapper_lab.positioning import EmpiricalErrorModel
+from rfmapper_lab.registry import POSITIONING_ENGINES
 from rfmapper_lab.timeutil import format_ms
 
 BASE_MS = 1_789_286_400_000
@@ -314,7 +321,6 @@ class TestBootstrap:
 
 class TestSelection:
     def _result(self, label, accuracy, cpu_ms, *, containment=0.7, width=0.05):
-        from rfmapper_lab.benchmark.harness import CandidateResult
         from rfmapper_lab.benchmark.metrics import CalibrationMetrics, ClassificationMetrics
 
         return CandidateResult(
@@ -536,6 +542,134 @@ class TestHarnessOnSyntheticData:
         assert "zone_bayes_v1" in labels
         assert "zone_bayes_v1 + rtt" in labels
         assert len(set(labels)) == len(labels)
+
+    def test_the_report_id_is_derived_from_the_data_and_the_split(self, dataset, report):
+        repeated = run_benchmark(
+            dataset,
+            dataset_kind=DatasetKind.SYNTHETIC,
+            resamples=RESAMPLES,
+            generated_at_utc=format_ms(BASE_MS),
+        )
+        other_split = run_benchmark(
+            dataset,
+            candidates=(
+                Candidate(
+                    label="zone_bayes_v1",
+                    zone_engine="zone_bayes_v1",
+                    params=replace(DEFAULTS, random_seed=DEFAULTS.random_seed + 1),
+                ),
+            ),
+            dataset_kind=DatasetKind.SYNTHETIC,
+            resamples=RESAMPLES,
+        )
+
+        assert report.report_id == repeated.report_id
+        assert report.report_id != other_split.report_id
+
+
+class TestEmpiricalErrorModel:
+    """The only route by which an estimate's uncertainty stops being geometric.
+
+    Without a measured model the Lab reports a circle derived from zone size and fingerprint
+    spread, flags it ``UNVALIDATED_UNCERTAINTY``, and has nothing to replace it with. The benchmark
+    measures per-method error; these tests are about that measurement reaching the next run.
+    """
+
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def report(dataset):
+        return run_benchmark(
+            dataset,
+            dataset_kind=DatasetKind.SYNTHETIC,
+            resamples=RESAMPLES,
+            generated_at_utc=format_ms(BASE_MS),
+        )
+
+    def test_the_measured_p68_is_emitted_per_placement_method(self, report):
+        model = empirical_error_model(report)
+
+        assert model is not None
+        assert model.p68_by_method
+        assert all(value > 0 for value in model.p68_by_method.values())
+        # Keyed by method, not by candidate: uncertainty is a property of how a position was
+        # obtained, and an RTT multilateration and a zone centroid are not comparably precise.
+        assert all(
+            method in POSITIONING_ENGINES.ids() for method in model.p68_by_method
+        )
+
+    def test_it_is_what_run_empirical_reads(self, report, tmp_path):
+        written = tmp_path / "empirical_error_model.json"
+        written.write_text(dumps(empirical_error_model(report).as_dict()), encoding="utf-8")
+
+        loaded = EmpiricalErrorModel.load(written)
+
+        assert loaded.p68_by_method == empirical_error_model(report).p68_by_method
+        assert loaded.dataset_kind == "SYNTHETIC"
+        assert loaded.source_report_id == report.report_id
+
+    def test_a_synthetic_measurement_never_counts_as_validated(self, report):
+        # Feeding synthetic error back is useful for development and must never let a real site's
+        # estimates lose the flag that says nobody measured them.
+        assert not empirical_error_model(report).validated
+
+    def test_a_method_with_too_few_held_out_samples_is_not_quoted(self, report):
+        generous = empirical_error_model(report, min_samples=1)
+        strict = empirical_error_model(report, min_samples=10_000)
+
+        assert generous is not None and generous.p68_by_method
+        assert strict is None, "a percentile over a handful of captures describes the captures"
+
+    def test_an_overconfident_candidate_still_yields_a_model(self):
+        """Refusing here would leave the optimistic sigma in place, which is the opposite of
+        recalibration: the measured error is exactly what should displace it.
+        """
+        records = tuple(
+            _record(
+                session=f"S{index % 3}",
+                truth_zone="Z1",
+                predicted_zone="Z1",
+                estimate_at=(6.0, 0.0),
+                sigma=0.4,
+            )
+            for index in range(12)
+        )
+        report = BenchmarkReport(
+            dataset_content_sha256="sha",
+            reference_model_id="site-1",
+            dataset_kind=DatasetKind.REAL,
+            split=SessionSplit(train=(), validation=(), test=("S0", "S1", "S2"), seed=1),
+            results=(
+                CandidateResult(
+                    candidate=Candidate(label="only", zone_engine="zone_bayes_v1"),
+                    classification=classification_metrics(records, _model_stub()),
+                    positional=positional_metrics(records),
+                    calibration=calibration_metrics(records),
+                    cpu_ms=1.0,
+                    records=records,
+                ),
+            ),
+            selected="only",
+            selection_reason="only candidate",
+        )
+
+        assert report.results[0].calibration.verdict == "OVERCONFIDENT"
+        model = empirical_error_model(report)
+        assert model is not None
+        assert model.p68_by_method["pos_wknn_centroid_v1"] == pytest.approx(6.0, abs=0.01)
+        assert model.validated, "a real-data measurement is what validation means"
+
+    def test_no_selected_candidate_means_no_model_rather_than_a_guess(self):
+        empty = BenchmarkReport(
+            dataset_content_sha256="sha",
+            reference_model_id="site-1",
+            dataset_kind=DatasetKind.REAL,
+            split=SessionSplit(train=(), validation=(), test=(), seed=1),
+            results=(),
+            selected=None,
+            selection_reason="no held-out samples to score against",
+        )
+
+        assert empirical_error_model(empty) is None
 
 
 class TestRegressionGate:

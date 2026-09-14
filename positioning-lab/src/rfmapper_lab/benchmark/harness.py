@@ -17,7 +17,10 @@ import time
 from dataclasses import dataclass, field, replace
 from typing import Sequence
 
+import numpy as np
+
 from ..fingerprint import FingerprintSet, build_fingerprints
+from ..jsonio import derive_id
 from ..models import DatasetKind, ReferenceModel
 from ..params import DEFAULTS, ParameterSet
 from ..parsing.dataset import Dataset
@@ -116,8 +119,24 @@ class BenchmarkReport:
     generated_at_utc: str = ""
     movement: dict[str, object] = field(default_factory=dict)
 
+    @property
+    def report_id(self) -> str:
+        """Derived from the data and the split, so an error model can cite the run that measured it.
+
+        Content-addressed rather than random: two reports over the same data, split the same way,
+        under the same versions, are the same report and should not be distinguishable by id.
+        """
+        return derive_id(
+            "benchmark_report",
+            self.algorithm_version,
+            self.dataset_content_sha256,
+            self.split.seed,
+            ",".join(self.split.test),
+        )
+
     def as_dict(self) -> dict[str, object]:
         return {
+            "report_id": self.report_id,
             "algorithm_version": self.algorithm_version,
             "engine_versions": dict(sorted(self.engine_versions.items())),
             "generated_at_utc": self.generated_at_utc,
@@ -398,3 +417,54 @@ def _cost_ratio(expensive: CandidateResult, cheap: CandidateResult) -> str:
 
 def with_movement(report: BenchmarkReport, movement: dict[str, object]) -> BenchmarkReport:
     return replace(report, movement=movement)
+
+
+#: Held-out located samples a method needs before its P68 error is worth quoting. Below this the
+#: percentile describes which few captures happened to land in the evaluation split rather than the
+#: method, and a confidently wrong error bar is worse than an admittedly unvalidated one.
+MIN_SAMPLES_PER_METHOD = 10
+
+
+def empirical_error_model(
+    report: BenchmarkReport,
+    min_samples: int = MIN_SAMPLES_PER_METHOD,
+) -> EmpiricalErrorModel | None:
+    """The selected candidate's measured per-method P68 error, ready for ``run --empirical``.
+
+    This is the only route by which an estimate's uncertainty stops being geometric. Without it the
+    Lab reports a circle derived from zone size and fingerprint spread and flags it
+    ``UNVALIDATED_UNCERTAINTY`` forever, because it has no measurement to replace it with.
+
+    An overconfident candidate is *not* excluded. Its measured error is exactly what should displace
+    the sigma it was being overconfident with, and refusing to emit a model for it would leave the
+    optimistic figure in place — the opposite of recalibration.
+
+    ``dataset_kind`` travels with the model, and :attr:`EmpiricalErrorModel.validated` requires
+    ``REAL``, so a measurement taken on synthetic data can be fed back without ever being mistaken
+    for evidence about a real site.
+    """
+    if report.selected is None:
+        return None
+    result = report.result_for(report.selected)
+    if result is None:
+        return None
+
+    errors: dict[str, list[float]] = {}
+    for record in result.records:
+        if record.estimate is None or record.error_m is None:
+            continue
+        errors.setdefault(record.estimate.method, []).append(record.error_m)
+
+    p68 = {
+        method: round(float(np.percentile(np.array(values, dtype=float), 68)), 3)
+        for method, values in sorted(errors.items())
+        if len(values) >= min_samples
+    }
+    if not p68:
+        return None
+
+    return EmpiricalErrorModel(
+        p68_by_method=p68,
+        dataset_kind=report.dataset_kind.value,
+        source_report_id=report.report_id,
+    )
