@@ -15,6 +15,10 @@ import com.rfmapper.core.model.InfrastructureNode
 import com.rfmapper.core.model.InfrastructureType
 import com.rfmapper.core.model.ManagedDevice
 import com.rfmapper.core.model.ObserverCalibration
+import com.rfmapper.core.model.ObserverCapability
+import com.rfmapper.core.model.ObserverDeviceType
+import com.rfmapper.core.model.ObserverIdentity
+import com.rfmapper.core.model.Platform
 import com.rfmapper.core.model.Point
 import com.rfmapper.core.model.RfMapperJson
 import com.rfmapper.core.model.SurveyPoint
@@ -194,7 +198,65 @@ data class ObserverEntity(
     @ColumnInfo(name = "enrolled") val enrolled: Boolean,
     @ColumnInfo(name = "enrolled_at_utc") val enrolledAtUtc: String?,
     @ColumnInfo(name = "notes") val notes: String?,
-)
+) {
+    fun toModel() = ObserverIdentity(
+        observerId = observerId,
+        friendlyName = friendlyName,
+        observerDeviceType = ObserverDeviceType.entries.firstOrNull { it.name == observerDeviceType }
+            ?: ObserverDeviceType.OTHER,
+        buildingId = buildingId,
+        defaultZoneId = defaultZoneId,
+        deviceModel = deviceModel,
+        manufacturer = manufacturer,
+        platform = Platform.entries.firstOrNull { it.name == platform } ?: Platform.OTHER,
+        osVersion = osVersion,
+        appVersion = appVersion.orEmpty(),
+        installationId = installationId,
+        capabilities = capabilities.mapNotNullTo(LinkedHashSet()) { name ->
+            ObserverCapability.entries.firstOrNull { it.name == name }
+        },
+        unsupported = unsupported.mapNotNullTo(LinkedHashSet()) { name ->
+            ObserverCapability.entries.firstOrNull { it.name == name }
+        },
+        xCoordinate = xCoordinate,
+        yCoordinate = yCoordinate,
+        fixedObserver = fixedObserver,
+        notes = notes,
+    )
+
+    companion object {
+        /**
+         * [enrolled] is not taken from the document. Enrolment is the Master administrator's
+         * decision about whose data it will accept, so a file that declared itself enrolled would
+         * be an observer granting itself permission.
+         */
+        fun from(
+            identity: ObserverIdentity,
+            enrolled: Boolean = false,
+            enrolledAtUtc: String? = null,
+        ) = ObserverEntity(
+            observerId = identity.observerId,
+            friendlyName = identity.friendlyName,
+            observerDeviceType = identity.observerDeviceType.name,
+            buildingId = identity.buildingId,
+            defaultZoneId = identity.defaultZoneId,
+            deviceModel = identity.deviceModel,
+            manufacturer = identity.manufacturer,
+            platform = identity.platform.name,
+            osVersion = identity.osVersion,
+            appVersion = identity.appVersion,
+            installationId = identity.installationId,
+            capabilities = identity.capabilities.map { it.name },
+            unsupported = identity.unsupported.map { it.name },
+            xCoordinate = identity.xCoordinate,
+            yCoordinate = identity.yCoordinate,
+            fixedObserver = identity.fixedObserver,
+            enrolled = enrolled,
+            enrolledAtUtc = enrolledAtUtc,
+            notes = identity.notes,
+        )
+    }
+}
 
 @Entity(tableName = "ref_building")
 data class BuildingEntity(

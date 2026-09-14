@@ -382,6 +382,12 @@ interface DerivedDao {
     @Query("SELECT * FROM der_generation ORDER BY imported_at_utc DESC")
     fun observeGenerations(): Flow<List<DerivedGenerationEntity>>
 
+    @Query("SELECT * FROM der_generation ORDER BY imported_at_utc DESC")
+    suspend fun generations(): List<DerivedGenerationEntity>
+
+    @Query("SELECT * FROM der_generation WHERE algorithm_version = :algorithmVersion")
+    suspend fun generation(algorithmVersion: String): DerivedGenerationEntity?
+
     @Query("SELECT * FROM der_generation WHERE is_active = 1 LIMIT 1")
     suspend fun activeGeneration(): DerivedGenerationEntity?
 
@@ -453,6 +459,48 @@ interface DerivedDao {
     @Query("SELECT * FROM der_quality_flag WHERE acknowledged_at_utc IS NULL ORDER BY created_at_utc DESC")
     fun observeOpenFlags(): Flow<List<QualityFlagEntity>>
 
+    /**
+     * How many distinct devices each zone currently holds, per the newest estimate for each device.
+     *
+     * Counted over latest-per-device rather than over all rows, because a device that sat in one
+     * zone for an hour would otherwise outvote a dozen devices that passed through in a minute.
+     */
+    @Query(
+        """
+        SELECT zone_id AS zoneId, building_id AS buildingId, COUNT(*) AS deviceCount,
+               AVG(confidence) AS meanConfidence
+        FROM (
+            SELECT e.* FROM der_position_estimate e
+            WHERE e.algorithm_version = :algorithmVersion AND e.zone_id IS NOT NULL
+              AND e.timestamp_epoch_ms = (
+                    SELECT MAX(i.timestamp_epoch_ms) FROM der_position_estimate i
+                    WHERE i.device_id = e.device_id AND i.algorithm_version = :algorithmVersion
+                  )
+            GROUP BY e.device_id
+        )
+        GROUP BY zone_id, building_id
+        ORDER BY deviceCount DESC
+        """,
+    )
+    fun observeZoneOccupancy(algorithmVersion: String): Flow<List<ZoneOccupancyRow>>
+
+    @Query(
+        """
+        SELECT precision_tier AS precisionTier, COUNT(*) AS count
+        FROM der_position_estimate WHERE algorithm_version = :algorithmVersion
+        GROUP BY precision_tier
+        """,
+    )
+    suspend fun tierBreakdown(algorithmVersion: String): List<TierCount>
+
+    @Query(
+        """
+        SELECT COUNT(DISTINCT device_id) FROM der_position_estimate
+        WHERE algorithm_version = :algorithmVersion
+        """,
+    )
+    suspend fun deviceCount(algorithmVersion: String): Int
+
     @Query(
         """
         UPDATE der_quality_flag SET acknowledged_at_utc = :atUtc, acknowledged_by = :by
@@ -489,3 +537,12 @@ interface DerivedDao {
         return removed
     }
 }
+
+data class ZoneOccupancyRow(
+    val zoneId: String,
+    val buildingId: String?,
+    val deviceCount: Int,
+    val meanConfidence: Double,
+)
+
+data class TierCount(val precisionTier: String, val count: Int)
