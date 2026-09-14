@@ -64,6 +64,18 @@ class ReferenceRepository(
     }
 
     /**
+     * Every enrolled device with its identifiers, in one pass rather than one query per device.
+     *
+     * Two queries and an in-memory join: a registry of a few hundred devices exported with a
+     * per-device identifier lookup would be a few hundred round trips for data that fits in memory
+     * comfortably.
+     */
+    suspend fun devices(): List<ManagedDevice> = withContext(Dispatchers.IO) {
+        val identifiers = devices.allIdentifiers().groupBy { it.deviceId }
+        devices.all().map { it.toModel(identifiers[it.deviceId].orEmpty()) }
+    }
+
+    /**
      * Enrols or updates a device together with the identifiers that attribute to it.
      *
      * Identifiers are normalized on the way in, so an administrator who types `AA-BB-CC-DD-EE-FF`

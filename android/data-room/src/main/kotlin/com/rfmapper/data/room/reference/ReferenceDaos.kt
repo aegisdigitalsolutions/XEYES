@@ -24,6 +24,10 @@ interface ManagedDeviceDao {
     @Query("SELECT * FROM ref_managed_device ORDER BY friendly_name")
     fun observeAll(): Flow<List<ManagedDeviceEntity>>
 
+    /** Ordered by id rather than by name, so an exported registry is stable under a rename. */
+    @Query("SELECT * FROM ref_managed_device ORDER BY device_id")
+    suspend fun all(): List<ManagedDeviceEntity>
+
     @Query("SELECT * FROM ref_managed_device WHERE device_id = :deviceId")
     suspend fun byId(deviceId: String): ManagedDeviceEntity?
 

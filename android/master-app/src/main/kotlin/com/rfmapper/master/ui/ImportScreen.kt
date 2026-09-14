@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rfmapper.core.importing.ImportPreview
 import com.rfmapper.data.room.DerivedPackageImporter
+import com.rfmapper.data.room.DeviceRegistryIo
 import com.rfmapper.data.room.SiteModelIo
 import com.rfmapper.data.room.raw.ImportBatchEntity
 import com.rfmapper.master.importing.ImportCoordinator
@@ -77,6 +78,8 @@ fun ImportScreen(viewModel: MasterViewModel, modifier: Modifier = Modifier) {
 
         outcome?.let { item { OutcomeCard(it) } }
 
+        item { ExportCard(viewModel) }
+
         if (history.isNotEmpty()) {
             item {
                 Text(
@@ -97,6 +100,7 @@ private fun StagedCard(staged: ImportCoordinator.Staged, viewModel: MasterViewMo
             is ImportCoordinator.Staged.Observations -> ObservationsPreview(staged.result.preview)
             is ImportCoordinator.Staged.Derived -> DerivedPreview(staged.preview)
             is ImportCoordinator.Staged.Site -> SitePreview(staged.preview)
+            is ImportCoordinator.Staged.Registry -> RegistryPreview(staged.preview)
             is ImportCoordinator.Staged.Unreadable -> Text(
                 staged.reason,
                 style = MaterialTheme.typography.bodyMedium,
@@ -111,6 +115,7 @@ private fun StagedCard(staged: ImportCoordinator.Staged, viewModel: MasterViewMo
                     is ImportCoordinator.Staged.Observations -> staged.canCommit
                     is ImportCoordinator.Staged.Derived -> staged.canCommit
                     is ImportCoordinator.Staged.Site -> staged.canCommit
+                    is ImportCoordinator.Staged.Registry -> staged.canCommit
                     is ImportCoordinator.Staged.Unreadable -> false
                 },
             ) { Text("Import") }
@@ -123,6 +128,7 @@ private fun stagedKind(staged: ImportCoordinator.Staged) = when (staged) {
     is ImportCoordinator.Staged.Observations -> "Observation package"
     is ImportCoordinator.Staged.Derived -> "Derived package from the Positioning Lab"
     is ImportCoordinator.Staged.Site -> "Site model"
+    is ImportCoordinator.Staged.Registry -> "Managed device registry"
     is ImportCoordinator.Staged.Unreadable -> "Unrecognised file"
 }
 
@@ -209,6 +215,76 @@ private fun SitePreview(preview: SiteModelIo.Preview) {
 }
 
 @Composable
+private fun RegistryPreview(preview: DeviceRegistryIo.Preview) {
+    preview.registry?.let { registry ->
+        KeyValue("Registry", registry.registryId)
+        KeyValue("Authored", registry.createdAt)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Counter("new", formatCount(preview.newDeviceIds.size))
+            Counter("updating", formatCount(preview.updatedDeviceIds.size))
+            Counter("in file", formatCount(registry.managedDevices.size))
+        }
+        Text(
+            "Devices missing from this file are left as they are, not retired. Removing a device " +
+                "stays something you do deliberately.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    IssueList(
+        blocking = preview.parseError?.let(::listOf).orEmpty() + preview.issues,
+        advisory = emptyList(),
+    )
+}
+
+/**
+ * The other half of the offline loop.
+ *
+ * The Lab cannot run on observation packages alone: it needs the site geometry to place a device
+ * in, and the device registry to decide which observations belong to a managed device at all.
+ * Both live only in this database, so exporting them is a step in the nightly procedure rather
+ * than a convenience.
+ */
+@Composable
+private fun ExportCard(viewModel: MasterViewModel) {
+    val exporting by viewModel.exporting.collectAsStateWithLifecycle()
+    val siteModelName by viewModel.siteModelFileName.collectAsStateWithLifecycle()
+    val registryName by viewModel.registryFileName.collectAsStateWithLifecycle()
+
+    val siteModelPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(JSON_MIME),
+    ) { uri -> uri?.let(viewModel::exportSiteModel) }
+
+    val registryPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(JSON_MIME),
+    ) { uri -> uri?.let(viewModel::exportDeviceRegistry) }
+
+    SectionCard(
+        "Export for the Positioning Lab",
+        subtitle = "Site model and managed device registry",
+    ) {
+        Text(
+            "The Lab reads three things: the observation packages, the site model, and the " +
+                "device registry. Without the registry it attributes nothing and produces no " +
+                "estimates at all.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                enabled = !exporting,
+                onClick = { siteModelPicker.launch(siteModelName) },
+            ) { Text("Site model") }
+            OutlinedButton(
+                enabled = !exporting,
+                onClick = { registryPicker.launch(registryName) },
+            ) { Text("Device registry") }
+        }
+        if (exporting) LinearProgressIndicator(Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
 private fun IssueList(blocking: List<String>, advisory: List<String>) {
     if (blocking.isNotEmpty()) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -281,3 +357,5 @@ private fun HistoryCard(batch: ImportBatchEntity) {
 }
 
 private const val MAX_SHOWN = 8
+
+private const val JSON_MIME = "application/json"

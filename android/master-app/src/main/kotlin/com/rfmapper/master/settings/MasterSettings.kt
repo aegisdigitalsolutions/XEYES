@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.rfmapper.core.model.RfMapperJson
+import com.rfmapper.core.model.SiteFrame
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -37,7 +39,33 @@ class MasterSettings(private val store: DataStore<Preferences>) {
 
     val referenceModelId: Flow<String> = store.data.map { it[REFERENCE_MODEL].orEmpty() }
 
+    /**
+     * The site's coordinate frame, remembered from the last site model applied.
+     *
+     * Kept here because no table holds it: the frame is one site-wide fact, not a property of any
+     * building or zone. Remembering it is what lets an exported site model carry the same origin it
+     * arrived with — without it every export would invent a frame, and the metre coordinates in it
+     * would silently stop being comparable to the ones already in the derived layer.
+     */
+    val siteFrame: Flow<SiteFrame?> = store.data.map { prefs ->
+        prefs[SITE_FRAME]?.let { encoded ->
+            runCatching {
+                RfMapperJson.compact.decodeFromString(SiteFrame.serializer(), encoded)
+            }.getOrNull()
+        }
+    }
+
     suspend fun currentOperator(): String = operator.first()
+
+    suspend fun currentReferenceModelId(): String = referenceModelId.first()
+
+    suspend fun currentSiteFrame(): SiteFrame? = siteFrame.first()
+
+    suspend fun setSiteFrame(frame: SiteFrame) {
+        store.edit {
+            it[SITE_FRAME] = RfMapperJson.compact.encodeToString(SiteFrame.serializer(), frame)
+        }
+    }
 
     suspend fun setOperator(value: String) {
         store.edit { it[OPERATOR] = value.trim() }
@@ -64,5 +92,6 @@ class MasterSettings(private val store: DataStore<Preferences>) {
         val ACTIVE_VERSION = stringPreferencesKey("active_algorithm_version")
         val SITE_FOLDER = stringPreferencesKey("site_folder_uri")
         val REFERENCE_MODEL = stringPreferencesKey("reference_model_id")
+        val SITE_FRAME = stringPreferencesKey("site_frame")
     }
 }

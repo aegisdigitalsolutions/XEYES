@@ -28,6 +28,7 @@ import com.rfmapper.data.room.reference.ManagedDeviceEntity
 import com.rfmapper.data.room.reference.ObserverEntity
 import com.rfmapper.master.MasterGraph
 import com.rfmapper.master.importing.ImportCoordinator
+import com.rfmapper.master.importing.ReferenceExporter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -54,6 +55,7 @@ class MasterViewModel(
     private val observations: ObservationRepository,
     private val batches: ImportBatchDao,
     private val importer: ImportCoordinator,
+    private val exporter: ReferenceExporter,
     private val settings: com.rfmapper.master.settings.MasterSettings,
 ) : ViewModel() {
 
@@ -238,6 +240,39 @@ class MasterViewModel(
         _outcome.value = null
     }
 
+    // -- reference export -------------------------------------------------------------------------
+
+    private val _exporting = MutableStateFlow(false)
+    val exporting: StateFlow<Boolean> = _exporting.asStateFlow()
+
+    /**
+     * Suggested filenames, resolved eagerly because the document picker needs one synchronously
+     * when the button is pressed.
+     */
+    val siteModelFileName: StateFlow<String> = settings.referenceModelId
+        .map { id -> "site_model_${id.ifBlank { "site" }}.json" }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, "site_model.json")
+
+    val registryFileName: StateFlow<String> =
+        MutableStateFlow(exporter.suggestedRegistryName()).asStateFlow()
+
+    fun exportSiteModel(destination: Uri) = export { exporter.exportSiteModel(destination) }
+
+    fun exportDeviceRegistry(destination: Uri) = export { exporter.exportDeviceRegistry(destination) }
+
+    private fun export(block: suspend () -> ReferenceExporter.Outcome) = viewModelScope.launch {
+        _exporting.value = true
+        val outcome = runCatching { block() }.getOrElse {
+            ReferenceExporter.Outcome("Export failed", listOf(it.message.orEmpty()), false)
+        }
+        _exporting.value = false
+        _outcome.value = ImportCoordinator.Outcome(
+            headline = outcome.headline,
+            detail = outcome.detail,
+            success = outcome.success,
+        )
+    }
+
     // -- observations -----------------------------------------------------------------------------
 
     data class ObservationFilter(
@@ -404,6 +439,7 @@ class MasterViewModel(
             observations = graph.observations,
             batches = graph.database.importBatchDao(),
             importer = graph.importer,
+            exporter = graph.exporter,
             settings = graph.settings,
         ) as T
     }

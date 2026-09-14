@@ -6,12 +6,14 @@ import com.rfmapper.core.importing.ImportEngineV1
 import com.rfmapper.core.importing.ObserverRegistry
 import com.rfmapper.data.room.DerivedPackageImporter
 import com.rfmapper.data.room.DerivedRepository
+import com.rfmapper.data.room.DeviceRegistryIo
 import com.rfmapper.data.room.ObservationRepository
 import com.rfmapper.data.room.PackageImporter
 import com.rfmapper.data.room.ReferenceRepository
 import com.rfmapper.data.room.RfMapperDatabase
 import com.rfmapper.data.room.SiteModelIo
 import com.rfmapper.master.importing.ImportCoordinator
+import com.rfmapper.master.importing.ReferenceExporter
 import com.rfmapper.master.settings.MasterSettings
 
 class MasterApplication : Application() {
@@ -74,6 +76,8 @@ class MasterGraph(private val context: Context) {
         )
     }
 
+    val deviceRegistryIo: DeviceRegistryIo by lazy { DeviceRegistryIo(reference) }
+
     val derivedImporter: DerivedPackageImporter by lazy {
         DerivedPackageImporter(derived = database.derivedDao(), batches = database.importBatchDao())
     }
@@ -84,6 +88,16 @@ class MasterGraph(private val context: Context) {
             observations = packageImporter,
             derived = derivedImporter,
             siteModel = siteModelIo,
+            deviceRegistry = deviceRegistryIo,
+            settings = settings,
+        )
+    }
+
+    val exporter: ReferenceExporter by lazy {
+        ReferenceExporter(
+            context = context,
+            siteModel = siteModelIo,
+            devices = deviceRegistryIo,
             settings = settings,
         )
     }

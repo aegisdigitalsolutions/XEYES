@@ -5,6 +5,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import com.rfmapper.core.importing.ImportIssue
 import com.rfmapper.data.room.DerivedPackageImporter
+import com.rfmapper.data.room.DeviceRegistryIo
 import com.rfmapper.data.room.PackageImporter
 import com.rfmapper.data.room.SiteModelIo
 import com.rfmapper.master.settings.MasterSettings
@@ -25,6 +26,7 @@ class ImportCoordinator(
     private val observations: PackageImporter,
     private val derived: DerivedPackageImporter,
     private val siteModel: SiteModelIo,
+    private val deviceRegistry: DeviceRegistryIo,
     private val settings: MasterSettings,
 ) {
 
@@ -48,6 +50,13 @@ class ImportCoordinator(
         data class Site(
             override val displayName: String,
             val preview: SiteModelIo.Preview,
+        ) : Staged {
+            val canCommit: Boolean get() = preview.canApply
+        }
+
+        data class Registry(
+            override val displayName: String,
+            val preview: DeviceRegistryIo.Preview,
         ) : Staged {
             val canCommit: Boolean get() = preview.canApply
         }
@@ -78,9 +87,12 @@ class ImportCoordinator(
             head.text.contains("reference_model_id") ->
                 Staged.Site(name, siteModel.preview(open(uri)))
 
+            head.text.contains("managed_devices") ->
+                Staged.Registry(name, deviceRegistry.preview(open(uri)))
+
             else -> Staged.Unreadable(
                 name,
-                "not an observation package, a derived package or a site model",
+                "not an observation package, a derived package, a site model or a device registry",
             )
         }
     }
@@ -92,6 +104,7 @@ class ImportCoordinator(
             is Staged.Observations -> commitObservations(staged)
             is Staged.Derived -> commitDerived(staged)
             is Staged.Site -> commitSite(staged)
+            is Staged.Registry -> commitRegistry(staged)
             is Staged.Unreadable -> Outcome(staged.reason, emptyList(), success = false)
         }
     }
@@ -144,6 +157,9 @@ class ImportCoordinator(
         }
         val applied = siteModel.apply(model)
         settings.setReferenceModelId(model.referenceModelId)
+        // Remembered because no table holds it, and an export that had to invent an origin would
+        // produce coordinates incomparable with the ones already stored.
+        settings.setSiteFrame(model.frame)
         return Outcome(
             headline = "Site model ${model.referenceModelId} applied",
             detail = listOf(
@@ -151,6 +167,33 @@ class ImportCoordinator(
                 "${applied.infrastructure} infrastructure nodes, ${applied.surveyPoints} survey points",
                 "${applied.fingerprints} fingerprints (status preserved), ${applied.calibrations} calibration entries",
             ),
+            success = true,
+        )
+    }
+
+    private suspend fun commitRegistry(staged: Staged.Registry): Outcome {
+        val registry = staged.preview.registry
+        if (!staged.canCommit || registry == null) {
+            return Outcome(
+                headline = "Device registry not applied",
+                detail = staged.preview.parseError?.let(::listOf) ?: staged.preview.issues,
+                success = false,
+            )
+        }
+        val operator = settings.currentOperator().ifBlank { null }
+        val applied = deviceRegistry.apply(registry, operator)
+        return Outcome(
+            headline = "Registry ${registry.registryId} applied",
+            detail = buildList {
+                add("${applied.created} devices enrolled, ${applied.updated} updated")
+                if (applied.rejectedIdentifiers.isNotEmpty()) {
+                    add(
+                        "${applied.rejectedIdentifiers.size} identifier(s) were unreadable and " +
+                            "were not stored: ${applied.rejectedIdentifiers.joinToString()}",
+                    )
+                }
+                add("Devices absent from the file were left alone, not retired")
+            },
             success = true,
         )
     }
