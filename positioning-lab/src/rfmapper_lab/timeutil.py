@@ -54,6 +54,17 @@ def day_bounds(date_stamp_utc: str) -> tuple[int, int]:
 
 
 def is_instant(text: str) -> bool:
+    """Whether a string is in the *canonical* form, not merely whether it can be parsed.
+
+    Strict where :func:`parse_ms` is tolerant, and the asymmetry is the point. Reading a package
+    should accept ``+00:00`` or a missing sub-second part, because the alternative is rejecting a
+    day of collection over punctuation. Writing one should not, because two spellings of the same
+    instant break lexical ordering and produce two different bytes for one moment.
+    """
+    return format_ms(parse_ms(text)) == text if _parseable(text) else False
+
+
+def _parseable(text: str) -> bool:
     try:
         parse_ms(text)
         return True

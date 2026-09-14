@@ -169,7 +169,17 @@ class MovementEngineV1:
                     self._movement(
                         device_id=device_id,
                         timestamp_ms=now,
-                        state=MovementState.REAPPEARED if reappeared else MovementState.MOVING,
+                        # A first sighting is an arrival in the record, not an observed movement:
+                        # the device may have been sitting in this zone all night. So the same
+                        # displacement rule applies here as everywhere else, and with no previous
+                        # position it reports STATIONARY rather than claiming motion.
+                        state=(
+                            MovementState.REAPPEARED
+                            if reappeared
+                            else self._stationary_or_moving(
+                                state, estimate, movement.stationary_radius_m
+                            )
+                        ),
                         algorithm_version=algorithm_version,
                         confirmed_zone_id=zone_id,
                         confidence=estimate.confidence,

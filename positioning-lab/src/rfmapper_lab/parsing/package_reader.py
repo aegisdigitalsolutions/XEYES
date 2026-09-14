@@ -159,7 +159,7 @@ def read_package(source: Path | BinaryIO, *, name: str | None = None) -> Package
     if OBSERVATIONS_CSV in entries:
         issues.extend(_cross_check_csv(entries[OBSERVATIONS_CSV], observations))
 
-    issues.extend(_check_manifest_counts(manifest, observations))
+    issues.extend(_check_manifest_counts(manifest, observations, invalid))
     issues.extend(_check_single_observer(manifest, observations))
 
     observer = _read_json_object(entries.get(OBSERVER))
@@ -279,14 +279,26 @@ def _cross_check_csv(payload: bytes, from_json: tuple[Observation, ...]) -> list
     return issues
 
 
-def _check_manifest_counts(manifest: dict[str, Any], observations: tuple[Observation, ...]) -> list[Issue]:
+def _check_manifest_counts(
+    manifest: dict[str, Any],
+    observations: tuple[Observation, ...],
+    invalid: int,
+) -> list[Issue]:
+    """Compare the declared count against what the package actually carries.
+
+    Undecodable rows count towards the total. They were written, so the manifest is right to
+    include them, and reporting a count discrepancy on top of the malformed-row finding would name
+    one defect twice and imply the export was truncated when it was not. The check matches
+    ``core-import/PackageValidator.kt``, which is tolerant for the same reason.
+    """
     declared = manifest.get("observation_count")
-    if not isinstance(declared, int) or declared == len(observations):
+    present = len(observations) + invalid
+    if not isinstance(declared, int) or declared == present:
         return []
     return [
         Issue(
             PackageProblem.MANIFEST_COUNT_MISMATCH,
-            f"manifest declares {declared} observations but the package carries {len(observations)}",
+            f"manifest declares {declared} observations but the package carries {present}",
         )
     ]
 
