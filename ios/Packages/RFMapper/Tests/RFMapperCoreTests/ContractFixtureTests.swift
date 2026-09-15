@@ -6,7 +6,7 @@ import XCTest
 ///
 /// The repository already has fixtures produced by Kotlin and consumed by Python. This adds the
 /// third producer: an export package written by the Swift core, committed under `contract/`, and
-/// then read back by the Kotlin `PackageValidator` (`ContractFixtureTest.kt`) and the Python Lab
+/// then read back by the Kotlin Master (`IosPackageContractTest.kt`) and the Python Lab
 /// (`test_ios_contract.py`). That round trip is what `docs/06-ios-capability-matrix.md` §7 promised
 /// as the acceptance criterion for an iOS Collector, and it is stronger than comparing the Swift
 /// output against Swift's own expectations: Python recomputes every `row_checksum` and every entry

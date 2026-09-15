@@ -1,7 +1,8 @@
 """The Python half of the Swift/Python contract.
 
-``ios/Tests/RFMapperCoreTests/ContractFixtureTests.swift`` writes ``RFMapper_OBSI1_2026-05-04.zip``
-into ``contract/`` from the Swift export engine. This reads it back.
+``ios/Packages/RFMapper/Tests/RFMapperCoreTests/ContractFixtureTests.swift`` writes
+``RFMapper_OBSI1_2026-05-04.zip`` into ``contract/`` from the Swift export engine. This reads it
+back.
 
 That direction is the valuable one. The Swift tests can only check Swift against its own
 expectations; this checks it against a second, independent implementation. ``read_package``
