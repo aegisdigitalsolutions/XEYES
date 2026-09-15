@@ -74,6 +74,44 @@ def attribute_device(observation: Observation, model: ReferenceModel) -> str | N
     return None
 
 
+CATEGORICAL_SENSORS = frozenset({SensorType.WIFI_ASSOCIATION, SensorType.ZONE_ANCHOR})
+"""Sensors whose evidence is a fact about proximity rather than a measured signal level."""
+
+
+def carries_evidence(observation: Observation) -> bool:
+    """Whether a row says anything about where a device was.
+
+    A signal level or a range is the usual answer, and for a scan result it is the only one: a
+    ``WIFI_SCAN`` or ``BLE`` row with no RSSI records that something was detected without recording
+    how strongly, which positions nothing.
+
+    Two sensor types are different in kind, because their evidence is *categorical* rather than
+    metric:
+
+    ``WIFI_ASSOCIATION``
+        A station is associated with exactly one access point, and only if it is within that access
+        point's range. "Attached to AP-NORTH" is therefore a proximity statement on its own, and
+        needs no signal level to mean something.
+
+    ``ZONE_ANCHOR``
+        An administrator's assertion that a node covers a zone. It never had an RSSI to begin with.
+
+    This distinction is not academic. iOS exposes the BSSID of the network a device is joined to but
+    **not** that network's signal strength (``docs/06-ios-capability-matrix.md`` §1), so every Wi-Fi
+    row an iOS Collector can produce arrives with ``rssi`` unset. Requiring a signal level here
+    discarded all of them before they reached a window — an iPhone reporting which tower it was
+    attached to produced no estimate and no diagnostic. On an association-based site
+    (``docs/19-association-only-deployment.md``) that is the entire signal being thrown away.
+
+    Keeping these rows cannot manufacture precision: a categorical measurement matches no
+    fingerprint, so the strategy order falls through to ``pos_zone_only_v1`` and reports a zone with
+    no coordinates.
+    """
+    if observation.rssi is not None or observation.rtt_distance_mm is not None:
+        return True
+    return observation.sensor_type in CATEGORICAL_SENSORS
+
+
 def build_vectors(
     observations: Sequence[Observation],
     model: ReferenceModel,
@@ -111,7 +149,7 @@ def build_vectors(
     #   that made it.
     by_device: dict[str, list[tuple[Observation, bool]]] = {}
     for observation in observations:
-        if observation.rssi is None and observation.rtt_distance_mm is None:
+        if not carries_evidence(observation):
             continue
         heard_device = attribute_device(observation, model)
         if heard_device is not None:

@@ -24,6 +24,7 @@ from ..models import (
     ZoneCandidate,
     ZoneResult,
 )
+from ..fusion.windows import CATEGORICAL_SENSORS
 from ..params import ParameterSet, ZoneParams
 from ..registry import zone_classifier
 
@@ -343,7 +344,17 @@ class ZoneAnchorV1:
         weights: dict[str, float] = {}
         for measurement in vector.measurements:
             zone_id = anchors.get(measurement.radio_identifier)
-            if zone_id is None or measurement.rssi_normalized is None:
+            if zone_id is None:
+                continue
+            if measurement.rssi_normalized is None:
+                if measurement.sensor_type not in CATEGORICAL_SENSORS:
+                    continue
+                # An association carries no signal level on every iOS device and on some Android
+                # ones, but a station is associated with exactly one access point and only within
+                # its range. That is the strongest zone evidence this classifier can receive, so it
+                # takes the full weight an RSSI-derived strength could reach rather than being
+                # discarded for lacking a number it never had.
+                weights[zone_id] = weights.get(zone_id, 0.0) + 1.0
                 continue
             # Strength ordering only, deliberately crude: -40 dBm is nearer than -80 dBm, and
             # nothing here converts either into metres.
