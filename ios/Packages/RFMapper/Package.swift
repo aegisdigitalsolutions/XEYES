@@ -21,13 +21,11 @@ let package = Package(
         // opens Xcode.
         .target(name: "RFMapperCollectorKit", dependencies: ["RFMapperCore"]),
 
-        .testTarget(
-            name: "RFMapperCoreTests",
-            dependencies: ["RFMapperCore"],
-            // The cross-language contract fixtures live at the repository root and are shared with
-            // the Kotlin and Python sides; the tests locate them by walking up from #filePath.
-            resources: []
-        ),
+        // The contract fixtures are not declared as resources: they live in the repository's
+        // `contract/` directory, shared with the Kotlin and Python sides, and the tests find them by
+        // walking up from #filePath. Copying them into a test bundle would mean the Swift side was
+        // checking itself against its own copy.
+        .testTarget(name: "RFMapperCoreTests", dependencies: ["RFMapperCore"]),
         .testTarget(name: "RFMapperCollectorKitTests", dependencies: ["RFMapperCollectorKit"]),
     ]
 )
