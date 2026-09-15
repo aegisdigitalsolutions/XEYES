@@ -37,3 +37,9 @@ htmlcov/
 .idea/
 *.iml
 .DS_Store
+
+# Swift Package Manager
+ios/.build/
+ios/.swiftpm/
+*.xcuserdatad/
+xcuserdata/
