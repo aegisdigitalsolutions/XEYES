@@ -36,7 +36,9 @@ struct RootView: View {
             ExportView()
                 .tabItem { Label("Export", systemImage: "square.and.arrow.up") }
             ObserverView()
-                .tabItem { Label("Observer", systemImage: "iphone.gen3") }
+                // "iphone", not "iphone.gen3": the generational variants arrived in SF Symbols 4.2
+                // with iOS 16.4, and this target deploys to 16.0, where the tab would render blank.
+                .tabItem { Label("Observer", systemImage: "iphone") }
         }
         .task { model.prepare() }
     }
