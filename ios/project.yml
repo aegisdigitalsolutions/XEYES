@@ -40,9 +40,9 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     DEVELOPMENT_LANGUAGE: en
-    # Left unset on purpose. Whoever signs this supplies their own team; a hard-coded one here
-    # fails to build for everybody else.
-    CODE_SIGN_STYLE: Automatic
+    # Signing lives in Config/Signing.xcconfig, not here. Build settings declared at this level
+    # override a target's xcconfig, so putting CODE_SIGN_STYLE or DEVELOPMENT_TEAM here would make
+    # the local override file silently ineffective.
   configs:
     Debug:
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
@@ -71,9 +71,14 @@ targets:
         product: RFMapperCore
       - package: RFMapper
         product: RFMapperCollectorKit
+    # PRODUCT_BUNDLE_IDENTIFIER, DEVELOPMENT_TEAM and CODE_SIGN_STYLE come from here, and are
+    # deliberately absent from `settings` below: a target setting beats its own xcconfig, so
+    # repeating them would defeat the local override the xcconfig exists to allow.
+    configFiles:
+      Debug: Config/Signing.xcconfig
+      Release: Config/Signing.xcconfig
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.rfmapper.collector
         # PRODUCT_NAME is deliberately left as the target name. Overriding it renames the built
         # product without renaming the scheme's BuildableName, and the home-screen name comes from
         # CFBundleDisplayName anyway.

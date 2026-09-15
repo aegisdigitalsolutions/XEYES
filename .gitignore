@@ -50,3 +50,8 @@ DerivedData/
 *.xcuserdatad/
 xcuserdata/
 *.xcworkspace/xcuserdata/
+
+# The signing override. Config/Signing.xcconfig is committed with placeholder values and optionally
+# includes this file; a team identifier and a bundle identifier belong to whoever ships the build,
+# not to the repository.
+ios/Config/Signing.local.xcconfig
