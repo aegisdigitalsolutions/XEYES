@@ -29,6 +29,7 @@
 		64DC06CE50524B18420C3AF5 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6C1BC847F358D11E0459371F /* RFMapperCollectorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFMapperCollectorApp.swift; sourceTree = "<group>"; };
 		76258C0AF90CAE90A9A447E8 /* RFMapperCollector.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RFMapperCollector.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C856E294E18412E85E8AA29 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		BB619E50C7D24BCBCF9F9EA7 /* ObserverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObserverView.swift; sourceTree = "<group>"; };
 		C574D1CDAF553FF3612E1F53 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F211F33F53D5737ECB3F05BF /* LiveFeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveFeedView.swift; sourceTree = "<group>"; };
@@ -75,10 +76,19 @@
 		79DDE7D266D863F67CF0BC43 = {
 			isa = PBXGroup;
 			children = (
+				B548EC65717FB45FFCF776CB /* Config */,
 				0F25408A78CC24F01C27633B /* Packages */,
 				14CF7EBEACB1B0A18AF3B0BD /* RFMapperCollector */,
 				EEACF427EA64179B3C95AC58 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		B548EC65717FB45FFCF776CB /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				9C856E294E18412E85E8AA29 /* Signing.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 		EEACF427EA64179B3C95AC58 /* Products */ = {
@@ -123,6 +133,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					6772AD3B7CBD8E00CC128A8D = {
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -209,7 +220,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -245,6 +255,7 @@
 		};
 		7C75E72665198BF685EF6019 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9C856E294E18412E85E8AA29 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -256,7 +267,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rfmapper.collector;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -266,6 +276,7 @@
 		};
 		BC519845A9665B039E595F50 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9C856E294E18412E85E8AA29 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -277,7 +288,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rfmapper.collector;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -318,7 +328,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";

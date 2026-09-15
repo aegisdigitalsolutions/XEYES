@@ -43,6 +43,7 @@ this repository.
 | [`18-site-model-specification.md`](18-site-model-specification.md) | Buildings, zones, anchors, survey points, site topology graph |
 | [`19-association-only-deployment.md`](19-association-only-deployment.md) | The no-survey deployment: APs on towers, association reports, tower-level answers |
 | [`20-ios-collector.md`](20-ios-collector.md) | The Swift Collector built against deliverable F, and what interoperating with it changed |
+| [`21-ios-shipping-checklist.md`](21-ios-shipping-checklist.md) | What stands between the iOS code and a signed build: Mac steps, Developer-account steps, and the gaps |
 
 ## Standing principles
 

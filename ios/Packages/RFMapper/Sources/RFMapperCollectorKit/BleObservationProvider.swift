@@ -57,8 +57,24 @@ public final class BleObservationProvider: NSObject, ObservationProvider {
         self.sink = sink
         self.sessionId = sessionId
         self.profile = profile
-        self.serviceFilter = serviceFilter.map(CBUUID.init(string:))
+        self.serviceFilter = Self.filter(from: serviceFilter)
         super.init()
+    }
+
+    /// Converts enrolled UUID strings to `CBUUID` without trusting them.
+    ///
+    /// `CBUUID(string:)` raises an `NSException` on a malformed string rather than returning nil, and
+    /// an Objective-C exception is not catchable in Swift -- so one bad entry terminates the app at
+    /// the moment a session starts, which is the worst possible time. The values normally come from
+    /// ``RadioIdentifierNormalizer/bluetoothUuid(_:)`` via the enrolment screen and are already
+    /// 128-bit, but they are persisted in `UserDefaults`, which means they outlive the build that
+    /// wrote them and can be carried forward from an older normalizer or edited by hand.
+    ///
+    /// Normalizing again here is cheap and makes the crash unreachable rather than unlikely.
+    private static func filter(from raw: [String]) -> [CBUUID] {
+        raw.compactMap { candidate in
+            RadioIdentifierNormalizer.bluetoothUuid(candidate).map(CBUUID.init(string:))
+        }
     }
 
     public var isAvailable: Bool {
@@ -85,7 +101,7 @@ public final class BleObservationProvider: NSObject, ObservationProvider {
     public func reconfigure(profile: ScanProfile, sessionId: String, serviceFilter: [String]) {
         self.profile = profile
         self.sessionId = sessionId
-        self.serviceFilter = serviceFilter.map(CBUUID.init(string:))
+        self.serviceFilter = Self.filter(from: serviceFilter)
         lastRecorded.removeAll()
         if wantsToScan {
             central?.stopScan()

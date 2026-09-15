@@ -88,13 +88,23 @@ is: Android for unattended collection, iOS for supervised survey work and for Ma
 
 ## 5. Required `Info.plist` keys
 
-| Key | Purpose |
-|---|---|
-| `NSBluetoothAlwaysUsageDescription` | BLE scanning (iOS 13+) |
-| `NSLocationWhenInUseUsageDescription` | GNSS + network info |
-| `NSLocationAlwaysAndWhenInUseUsageDescription` | Background location, iBeacon monitoring |
-| `UIBackgroundModes` = `bluetooth-central`, `location` | Background BLE and location |
-| `com.apple.developer.networking.wifi-info` (entitlement) | `NEHotspotNetwork.fetchCurrent` |
+Per capability, so the set a build actually needs depends on which of them it uses.
+
+| Key | Purpose | In the shipped app |
+|---|---|---|
+| `NSBluetoothAlwaysUsageDescription` | BLE scanning (iOS 13+) | Yes |
+| `NSLocationWhenInUseUsageDescription` | GNSS + network info | Yes |
+| `NSLocationAlwaysAndWhenInUseUsageDescription` | Background location, iBeacon monitoring | **No** — neither is implemented |
+| `UIBackgroundModes` = `bluetooth-central` | Service-filtered background BLE | Yes |
+| `UIBackgroundModes` = `location` | Keeping the process alive longer | **No** — see below |
+| `com.apple.developer.networking.wifi-info` (entitlement) | `NEHotspotNetwork.fetchCurrent` | Yes |
+
+A declared background mode that the code never exercises is not free: App Review scrutinises
+background location more closely than any other capability, and §4 below is explicit that it never
+restored unfiltered BLE scanning anyway. So the app declares `bluetooth-central` and nothing else.
+The two location entries belong with beacon monitoring in §7, which is not built; adding either back
+means adding that feature and justifying it. See
+[`21-ios-shipping-checklist.md`](21-ios-shipping-checklist.md) §3.5.
 
 ## 6. Architectural consequences
 

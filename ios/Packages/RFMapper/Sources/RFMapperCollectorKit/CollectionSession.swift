@@ -10,6 +10,15 @@ import RFMapperCore
 /// because advertisements were thinned -- looks from the Lab's side like a site with fewer radios in
 /// it. Recording the loss is what keeps an unexplained coverage gap from becoming a false statement
 /// about the site.
+///
+/// **Main-queue confined.** The counters and `recentObservations` are plain mutable state with no
+/// lock, so every ``ObservationSink`` call must arrive on the main queue. That is an invariant the
+/// providers uphold rather than a hope: `CBCentralManager` is constructed with `queue: .main`,
+/// `CLLocationManager` calls back on the queue it was created on, the association poll timer runs on
+/// the main run loop, and ``AssociationObservationProvider`` explicitly hops `fetchCurrent`'s
+/// completion to main because that one API does not document its queue. A new provider that calls in
+/// from elsewhere must hop too -- appending to an array from two queues corrupts it rather than
+/// merely racing.
 public final class CollectionSession: ObservationSink {
 
     public let sessionId: String
