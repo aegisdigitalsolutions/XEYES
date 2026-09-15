@@ -37,3 +37,16 @@ htmlcov/
 .idea/
 *.iml
 .DS_Store
+
+# Swift Package Manager. Unanchored: the package lives at ios/Packages/RFMapper, and its build
+# directory should stay ignored wherever it is built from.
+.build/
+.swiftpm/
+
+# Xcode. The .xcodeproj itself is committed -- it is generated from ios/project.yml, but committing
+# it means the project opens without anyone installing XcodeGen first. Per-user state inside it is
+# not, because it records window positions and the last scheme a particular developer selected.
+DerivedData/
+*.xcuserdatad/
+xcuserdata/
+*.xcworkspace/xcuserdata/

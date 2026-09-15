@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Lets NEHotspotNetwork.fetchCurrent disclose the BSSID of the joined network, which is the
+	     only Wi-Fi observation an iOS Collector can make at all
+	     (docs/06-ios-capability-matrix.md §1). Without it the app still runs: the association
+	     provider records a WIFI_INFO_UNAVAILABLE degradation, so the missing rows have a stated
+	     cause instead of looking like a site with no access points in it.
+
+	     This entitlement must also be enabled on the App ID in the developer portal; a provisioning
+	     profile that lacks it will fail to install the build. -->
+	<key>com.apple.developer.networking.wifi-info</key>
+	<true/>
+</dict>
+</plist>

@@ -1,0 +1,391 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		011155E7CFBC1018C55D333C /* ObserverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB619E50C7D24BCBCF9F9EA7 /* ObserverView.swift */; };
+		09278E308A2857B757FA441B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C574D1CDAF553FF3612E1F53 /* Assets.xcassets */; };
+		6890050D1101B5F7BE72B08D /* CollectorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B39FE19003FA6367B40725 /* CollectorModel.swift */; };
+		6F2EF49DA3B0DE1243673565 /* RFMapperCollectorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1BC847F358D11E0459371F /* RFMapperCollectorApp.swift */; };
+		86BF8DF4B10160624FB785AF /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 64DC06CE50524B18420C3AF5 /* PrivacyInfo.xcprivacy */; };
+		C0667CA9D5109D4705A0F9B2 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADF53DC59666DEFFC95B576 /* SessionView.swift */; };
+		C2C87B088A8CB6B4A9CC71B4 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F2D140C5BEF76F72174B52 /* ExportView.swift */; };
+		D0E1D5A9B39326C16F64E248 /* RFMapperCore in Frameworks */ = {isa = PBXBuildFile; productRef = D99DA4A10196CD01681DCE88 /* RFMapperCore */; };
+		EB361CF914A0F9E056C8A780 /* RFMapperCollectorKit in Frameworks */ = {isa = PBXBuildFile; productRef = 485A1F7367128CD39591819F /* RFMapperCollectorKit */; };
+		FF20F23220074583FE231595 /* LiveFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F211F33F53D5737ECB3F05BF /* LiveFeedView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0803D736B5F48D1E276C867A /* RFMapperCollector.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RFMapperCollector.entitlements; sourceTree = "<group>"; };
+		13B39FE19003FA6367B40725 /* CollectorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectorModel.swift; sourceTree = "<group>"; };
+		40F2D140C5BEF76F72174B52 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		4AAF18878104196C28A00482 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5ADF53DC59666DEFFC95B576 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
+		63B89347EEFCC6A95B95D47F /* RFMapper */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RFMapper; path = Packages/RFMapper; sourceTree = SOURCE_ROOT; };
+		64DC06CE50524B18420C3AF5 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		6C1BC847F358D11E0459371F /* RFMapperCollectorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RFMapperCollectorApp.swift; sourceTree = "<group>"; };
+		76258C0AF90CAE90A9A447E8 /* RFMapperCollector.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RFMapperCollector.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB619E50C7D24BCBCF9F9EA7 /* ObserverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObserverView.swift; sourceTree = "<group>"; };
+		C574D1CDAF553FF3612E1F53 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F211F33F53D5737ECB3F05BF /* LiveFeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveFeedView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		79428CD5960BEB05FA64BEDF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0E1D5A9B39326C16F64E248 /* RFMapperCore in Frameworks */,
+				EB361CF914A0F9E056C8A780 /* RFMapperCollectorKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0F25408A78CC24F01C27633B /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				63B89347EEFCC6A95B95D47F /* RFMapper */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		14CF7EBEACB1B0A18AF3B0BD /* RFMapperCollector */ = {
+			isa = PBXGroup;
+			children = (
+				C574D1CDAF553FF3612E1F53 /* Assets.xcassets */,
+				13B39FE19003FA6367B40725 /* CollectorModel.swift */,
+				40F2D140C5BEF76F72174B52 /* ExportView.swift */,
+				4AAF18878104196C28A00482 /* Info.plist */,
+				F211F33F53D5737ECB3F05BF /* LiveFeedView.swift */,
+				BB619E50C7D24BCBCF9F9EA7 /* ObserverView.swift */,
+				64DC06CE50524B18420C3AF5 /* PrivacyInfo.xcprivacy */,
+				0803D736B5F48D1E276C867A /* RFMapperCollector.entitlements */,
+				6C1BC847F358D11E0459371F /* RFMapperCollectorApp.swift */,
+				5ADF53DC59666DEFFC95B576 /* SessionView.swift */,
+			);
+			path = RFMapperCollector;
+			sourceTree = "<group>";
+		};
+		79DDE7D266D863F67CF0BC43 = {
+			isa = PBXGroup;
+			children = (
+				0F25408A78CC24F01C27633B /* Packages */,
+				14CF7EBEACB1B0A18AF3B0BD /* RFMapperCollector */,
+				EEACF427EA64179B3C95AC58 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EEACF427EA64179B3C95AC58 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				76258C0AF90CAE90A9A447E8 /* RFMapperCollector.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6772AD3B7CBD8E00CC128A8D /* RFMapperCollector */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0E7C4D39F4EE6F372E9D4F61 /* Build configuration list for PBXNativeTarget "RFMapperCollector" */;
+			buildPhases = (
+				0ACD8303FDD64E66D3BD1D5B /* Sources */,
+				952B8C3FFFD9A8AEE1F91B16 /* Resources */,
+				79428CD5960BEB05FA64BEDF /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RFMapperCollector;
+			packageProductDependencies = (
+				D99DA4A10196CD01681DCE88 /* RFMapperCore */,
+				485A1F7367128CD39591819F /* RFMapperCollectorKit */,
+			);
+			productName = RFMapperCollector;
+			productReference = 76258C0AF90CAE90A9A447E8 /* RFMapperCollector.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DB30DDE1D23FA63FF070730D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					6772AD3B7CBD8E00CC128A8D = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = CA618D2B01D0E0BD0D3DE115 /* Build configuration list for PBXProject "RFMapperCollector" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 79DDE7D266D863F67CF0BC43;
+			packageReferences = (
+				ABBF6C57272998155916519E /* XCLocalSwiftPackageReference "Packages/RFMapper" */,
+			);
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6772AD3B7CBD8E00CC128A8D /* RFMapperCollector */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		952B8C3FFFD9A8AEE1F91B16 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				09278E308A2857B757FA441B /* Assets.xcassets in Resources */,
+				86BF8DF4B10160624FB785AF /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0ACD8303FDD64E66D3BD1D5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6890050D1101B5F7BE72B08D /* CollectorModel.swift in Sources */,
+				C2C87B088A8CB6B4A9CC71B4 /* ExportView.swift in Sources */,
+				FF20F23220074583FE231595 /* LiveFeedView.swift in Sources */,
+				011155E7CFBC1018C55D333C /* ObserverView.swift in Sources */,
+				6F2EF49DA3B0DE1243673565 /* RFMapperCollectorApp.swift in Sources */,
+				C0667CA9D5109D4705A0F9B2 /* SessionView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1E867DA47EA72C53FDB51D03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_LANGUAGE = en;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		7C75E72665198BF685EF6019 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RFMapperCollector/RFMapperCollector.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RFMapperCollector/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rfmapper.collector;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BC519845A9665B039E595F50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RFMapperCollector/RFMapperCollector.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RFMapperCollector/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rfmapper.collector;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FBDDBC4BF41BD2845E338877 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_LANGUAGE = en;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0E7C4D39F4EE6F372E9D4F61 /* Build configuration list for PBXNativeTarget "RFMapperCollector" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC519845A9665B039E595F50 /* Debug */,
+				7C75E72665198BF685EF6019 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CA618D2B01D0E0BD0D3DE115 /* Build configuration list for PBXProject "RFMapperCollector" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E867DA47EA72C53FDB51D03 /* Debug */,
+				FBDDBC4BF41BD2845E338877 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		ABBF6C57272998155916519E /* XCLocalSwiftPackageReference "Packages/RFMapper" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/RFMapper;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		485A1F7367128CD39591819F /* RFMapperCollectorKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RFMapperCollectorKit;
+		};
+		D99DA4A10196CD01681DCE88 /* RFMapperCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RFMapperCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = DB30DDE1D23FA63FF070730D /* Project object */;
+}

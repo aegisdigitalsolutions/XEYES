@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+
+	<!-- Empty deliberately, and accurately. Apple's "collected" means transmitted off the device;
+	     this app has no network code and no analytics. Observations are written to a local SQLite
+	     database and leave only as an export package the operator hands over themselves. That is
+	     also the one privacy property of this system worth defending: the data never moves without
+	     someone deciding to move it. -->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<!-- UserDefaults, for the observer identity, the installation id and the enrolled
+			     service UUIDs. All of it is this app's own container; none of it is shared. -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

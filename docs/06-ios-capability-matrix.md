@@ -1,7 +1,8 @@
 # Deliverable F — iOS / iPadOS capability and limitation matrix
 
-Milestone 6. No iOS code is written yet; this document exists to prevent a design that assumes
-Android parity, which both specifications explicitly warn against.
+Milestone 6. This document exists to prevent a design that assumes Android parity, which both
+specifications explicitly warn against. It describes the platform; the Collector built against it is
+[`20-ios-collector.md`](20-ios-collector.md).
 
 **Bottom line: iOS cannot be a Wi-Fi observer.** An iOS Collector is a *BLE* observer plus a Master
 viewing/administration client. Any plan that budgets iOS Wi-Fi scanning is wrong.

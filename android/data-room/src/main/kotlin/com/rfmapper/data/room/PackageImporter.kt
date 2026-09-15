@@ -3,11 +3,14 @@ package com.rfmapper.data.room
 import com.rfmapper.core.importing.DeduplicationPlanner
 import com.rfmapper.core.importing.ImportEngine
 import com.rfmapper.core.importing.ImportEngineV1
+import com.rfmapper.core.importing.ImportErrorCode
 import com.rfmapper.core.importing.ImportIssue
 import com.rfmapper.core.importing.ImportPreview
 import com.rfmapper.core.importing.ObserverRegistry
 import com.rfmapper.core.importing.ZipPackageReader
+import com.rfmapper.core.model.IdentifierType
 import com.rfmapper.core.model.Iso8601
+import com.rfmapper.core.model.MetadataKeys
 import com.rfmapper.core.model.Observation
 import com.rfmapper.core.model.RfMapperJson
 import com.rfmapper.data.room.raw.ImportBatchEntity
@@ -65,7 +68,15 @@ class PackageImporter(
             val reader = ZipPackageReader.from(stream)
             val enrolled = observers.enrolledIds().toSet()
             val validator = ImportEngineV1(ObserverRegistry { it in enrolled })
-            val preview = validator.preview(reader, repository.existingIdLookup())
+            val validated = validator.preview(reader, repository.existingIdLookup())
+
+            // Attribution is re-evaluated here, in the preview, and not only at commit. The
+            // administrator is required to see what they are accepting before they accept it, and a
+            // row whose device the Collector and the Master disagree about is exactly the kind of
+            // thing worth seeing first.
+            val preview = validated.copy(
+                issues = validated.issues + disagreements(resolve(validated.newObservations)),
+            )
 
             val previous = reader.packageSha256()?.let { batches.byPackageSha256(it) }
 
@@ -150,31 +161,118 @@ class PackageImporter(
         val lastSeenByDevice: Map<String, String>,
     )
 
-    private suspend fun attribute(observations: List<Observation>): Attributed {
-        if (observations.isEmpty()) return Attributed(observations, 0, emptyMap())
+    /**
+     * The Master's own attribution verdict for one row, beside what the Collector claimed.
+     *
+     * Kept as a pair rather than collapsed immediately, because the two differing is itself
+     * information the administrator is owed (`docs/17-identity-and-attribution-policy.md` §5) and
+     * collapsing them first would throw it away.
+     */
+    private data class Verdict(
+        val observation: Observation,
+        val deviceId: String?,
+    ) {
+        val claimed: String? get() = observation.targetDeviceId
+        val disagrees: Boolean get() = claimed != deviceId
+    }
 
-        // Only durable identifiers are looked up at all. An ephemeral one has no stable identity to
-        // match against, so querying for it would be meaningless even before the policy forbids it.
-        val lookupKeys = observations
-            .filterNot { it.identifierType.isEphemeral }
-            .map { it.radioIdentifier }
-            .distinct()
+    /**
+     * Re-evaluates every row's attribution against the Master's current registry.
+     *
+     * Two lookup keys, not one. The obvious key is the row's own `radio_identifier`, which covers a
+     * device enrolled by address. The second is `ble_service_uuid`, and without it the registry's
+     * `SERVICE_UUID` rule -- the one `docs/17` §4 calls recommended, and the only rule that works
+     * across Android and iOS -- would never fire on import at all. That is not a marginal omission:
+     * CoreBluetooth never discloses a peripheral's address, so an iOS row's `radio_identifier` is an
+     * app-install-scoped UUID that this registry cannot possibly hold, and the service UUID is the
+     * only thing about the row the Master and the Collector can both recognise. Without it every
+     * BLE row from every iPhone is unattributable by the Master, whatever the tag advertises.
+     *
+     * A randomized address is still never matched *on the address*. A row that carries one and also
+     * advertises an enrolled service UUID is attributed on the service UUID, which is what "survives
+     * MAC randomization" in §4 means: the durable thing the device broadcast, not the address it
+     * rotated.
+     */
+    private suspend fun resolve(observations: List<Observation>): List<Verdict> {
+        if (observations.isEmpty()) return emptyList()
+
+        val lookupKeys = buildSet {
+            observations.forEach { observation ->
+                if (!observation.identifierType.isEphemeral) add(observation.radioIdentifier)
+                observation.bleServiceUuid?.let { add(it) }
+            }
+        }
 
         val byIdentifier = lookupKeys
             .chunked(ObservationRepository.SQLITE_PARAMETER_LIMIT)
             .flatMap { devices.attributionsFor(it) }
             .associateBy { it.identifier to it.identifierType }
 
+        return observations.map { observation ->
+            val byAddress = when {
+                observation.identifierType.isEphemeral -> null
+                else -> byIdentifier[observation.radioIdentifier to observation.identifierType.name]
+            }
+            val byServiceUuid = observation.bleServiceUuid
+                ?.let { byIdentifier[it to IdentifierType.BLE_SERVICE_UUID.name] }
+
+            Verdict(observation, (byAddress ?: byServiceUuid)?.deviceId)
+        }
+    }
+
+    /**
+     * One advisory per row the Collector and the Master disagree about.
+     *
+     * Advisory, not blocking: the row is a real measurement and is stored either way. What must not
+     * happen is the disagreement being resolved silently, since a stale Collector claim and a
+     * correct one are indistinguishable once the field has been overwritten.
+     */
+    private fun disagreements(verdicts: List<Verdict>): List<ImportIssue> =
+        verdicts.mapNotNull { verdict ->
+            val claimed = verdict.claimed ?: return@mapNotNull null
+            if (!verdict.disagrees) return@mapNotNull null
+            ImportIssue(
+                code = ImportErrorCode.ATTRIBUTION_DISAGREEMENT,
+                message = "the package attributes ${verdict.observation.radioIdentifier} to " +
+                    "$claimed; this Master's registry says " +
+                    (verdict.deviceId ?: "no enrolled device") +
+                    ". The Master's verdict is authoritative and the claim is kept in " +
+                    "metadata.${MetadataKeys.COLLECTOR_CLAIMED_DEVICE_ID}.",
+                observationId = verdict.observation.observationId,
+            )
+        }
+
+    /**
+     * Applies the Master's verdicts to the rows about to be written.
+     *
+     * The Collector's claim is replaced, not merged: a Collector stamps `target_device_id` from
+     * whatever registry snapshot it happened to hold, which may be weeks stale or may simply be
+     * another site's. Only the claim is touched -- no measurement field is ever rewritten on import.
+     */
+    private suspend fun attribute(observations: List<Observation>): Attributed {
+        if (observations.isEmpty()) return Attributed(observations, 0, emptyMap())
+
         var attributedCount = 0
         val lastSeen = HashMap<String, String>()
-        val resolved = observations.map { observation ->
-            if (observation.identifierType.isEphemeral) return@map observation
-            val match = byIdentifier[observation.radioIdentifier to observation.identifierType.name]
-                ?: return@map observation
+        val resolved = resolve(observations).map { verdict ->
+            val observation = verdict.observation
 
-            attributedCount++
-            lastSeen.merge(match.deviceId, observation.timestampUtc) { a, b -> maxOf(a, b) }
-            observation.copy(targetDeviceId = match.deviceId)
+            verdict.deviceId?.let { deviceId ->
+                attributedCount++
+                lastSeen.merge(deviceId, observation.timestampUtc) { a, b -> maxOf(a, b) }
+            }
+
+            if (!verdict.disagrees) return@map observation
+
+            val claimed = verdict.claimed
+            observation.copy(
+                targetDeviceId = verdict.deviceId,
+                metadata = when (claimed) {
+                    null -> observation.metadata
+                    else -> observation.metadata +
+                        (MetadataKeys.COLLECTOR_CLAIMED_DEVICE_ID to claimed)
+                },
+            )
         }
 
         return Attributed(resolved, attributedCount, lastSeen)

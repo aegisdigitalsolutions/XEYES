@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleDisplayName</key>
+	<string>RFMapper</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+
+	<!-- Read back by CollectorModel.appVersion and written into every observation's metadata and
+	     every package manifest, so an imported package can be traced to the build that produced it.
+	     Defined once, in MARKETING_VERSION. -->
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- Purpose strings. Required by docs/06-ios-capability-matrix.md §5, and each says what the
+	     access is actually for rather than the generic wording a reviewer sees a hundred times. -->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>RFMapper records nearby Bluetooth advertisements and their signal strength to map wireless coverage at this site. It does not connect to any device.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>RFMapper records this phone's position alongside each radio observation, and iOS requires location access before it will disclose which Wi-Fi network the phone is joined to.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Background location keeps a survey session running while the phone is in a pocket, and is required to monitor enrolled Bluetooth beacons for zone presence.</string>
+
+	<!-- Background BLE is service-filtered and system-throttled, and `location` keeps the process
+	     alive for longer sessions. Neither restores unfiltered scanning: see the capability matrix
+	     §4, which is why the app is built as a supervised survey tool. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+		<string>location</string>
+	</array>
+
+	<!-- Export packages are written to Documents/Exports. Exposing them over USB and in the Files
+	     app gives a hand-off that does not depend on the share sheet, a network, or this app still
+	     being installed. -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+
+	<!-- SHA-256 over a package is a digest, not encryption, and nothing here encrypts anything. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+</dict>
+</plist>
