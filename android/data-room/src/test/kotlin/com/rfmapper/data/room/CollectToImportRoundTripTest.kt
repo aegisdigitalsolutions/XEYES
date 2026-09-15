@@ -4,8 +4,13 @@ import androidx.test.core.app.ApplicationProvider
 import com.rfmapper.core.export.ExportPackage
 import com.rfmapper.core.export.ZipExportSink
 import com.rfmapper.core.importing.ImportErrorCode
+import com.rfmapper.core.model.IdentifierType
 import com.rfmapper.core.model.Iso8601
+import com.rfmapper.core.model.MetadataKeys
+import com.rfmapper.core.model.Observation
+import com.rfmapper.core.model.ObserverDeviceType
 import com.rfmapper.core.model.SampleKind
+import com.rfmapper.core.model.SensorType
 import com.rfmapper.core.radio.CollectionEngine
 import com.rfmapper.core.radio.IdGenerator
 import com.rfmapper.core.radio.ObservationFactory
@@ -179,6 +184,101 @@ class CollectToImportRoundTripTest {
         batches = master.importBatchDao(),
         nowMillis = { RoomFixtures.DAY_START + 20 * 60 * 60 * 1000L },
     )
+
+    /**
+     * Writes rows straight to the Collector's store, bypassing the collection engine.
+     *
+     * The Android engine cannot produce an iOS-shaped row — it has a hardware address to work with —
+     * and the shape is the point of these two tests. The export and import paths afterwards are the
+     * real ones.
+     */
+    private suspend fun writeRaw(observations: List<Observation>) {
+        collectorRepository.write(observations)
+        collectorRepository.upsertSession(
+            SessionEntity(
+                sessionId = RoomFixtures.SESSION,
+                startedAtUtc = observations.minOf { it.timestampUtc },
+                startedAtEpochMs = observations.minOf { it.timestampEpochMillis },
+                endedAtUtc = observations.maxOf { it.timestampUtc },
+                observerId = observer.observerId,
+                scanProfile = "IOS_FOREGROUND_SURVEY",
+                buildingId = "B7",
+                zoneId = "B7-CENTER",
+                observationCount = observations.size.toLong(),
+                wifiCount = 0,
+                bleCount = observations.size.toLong(),
+                rttCount = 0,
+                gpsCount = 0,
+                droppedSamples = 0,
+                throttledScanRequests = 0,
+                backgroundDenied = false,
+                suspectedServiceKill = false,
+                batteryStartPct = null,
+                batteryEndPct = null,
+                degradations = emptyList(),
+            ),
+        )
+    }
+
+    /** A BLE sighting as an iPhone reports one: a per-install UUID, never an address. */
+    private fun peripheralRow(
+        index: Int,
+        serviceUuid: String?,
+        claimed: String? = null,
+    ) = Observation(
+        observationId = RoomFixtures.observationId(9_000 + index),
+        timestampUtc = Iso8601.format(RoomFixtures.DAY_START + index * 1_000L),
+        observerId = observer.observerId,
+        observerDeviceType = ObserverDeviceType.IOS_PHONE,
+        sensorType = SensorType.BLE,
+        targetDeviceId = claimed,
+        radioIdentifier = PERIPHERAL_UUID,
+        // Neither a public nor a random MAC. Claiming either would invite a reader to treat this
+        // UUID as an address.
+        identifierType = IdentifierType.OTHER,
+        bleServiceUuid = serviceUuid,
+        rssi = -58,
+        buildingId = "B7",
+        zoneId = "B7-CENTER",
+        confidence = 0.9,
+        metadata = mapOf(
+            MetadataKeys.SESSION_ID to RoomFixtures.SESSION,
+            MetadataKeys.IDENTIFIER_SCOPE to "APP_INSTALL",
+            MetadataKeys.IOS_PERIPHERAL_IDENTIFIER to PERIPHERAL_UUID,
+        ),
+    )
+
+    private suspend fun enrolTagByServiceUuid() {
+        master.managedDeviceDao().replaceDevice(
+            ManagedDeviceEntity(
+                deviceId = "DEV-TAG",
+                friendlyName = "Toolbox tag",
+                deviceType = "BLE_TAG",
+                status = "AUTHORIZED",
+                notes = null,
+                firstSeenUtc = null,
+                lastSeenUtc = null,
+                createdAtUtc = Iso8601.format(RoomFixtures.DAY_START),
+                updatedAtUtc = Iso8601.format(RoomFixtures.DAY_START),
+            ),
+            identifiers = listOf(
+                DeviceIdentifierEntity(
+                    identifier = TAG_SERVICE_UUID,
+                    identifierType = "BLE_SERVICE_UUID",
+                    deviceId = "DEV-TAG",
+                    addedBy = "AM",
+                    addedAtUtc = Iso8601.format(RoomFixtures.DAY_START),
+                    notes = null,
+                ),
+            ),
+        )
+    }
+
+    private companion object {
+        /** A `CBPeripheral.identifier`: stable for one app install and meaningless anywhere else. */
+        const val PERIPHERAL_UUID = "9f8e7d6c-5b4a-4392-8281-706f5e4d3c2b"
+        const val TAG_SERVICE_UUID = "6b1a7e10-3c4d-4f5a-9b8c-1d2e3f405162"
+    }
 
     // -- tests --------------------------------------------------------------------------------------
 
@@ -372,6 +472,95 @@ class CollectToImportRoundTripTest {
         assertEquals(0, commit.attributed, "a rotating address is not an identity")
         val stored = master.observationDao().pageForExport(0, Long.MAX_VALUE, "", "", 100)
         assertTrue(stored.all { it.targetDeviceId == null })
+    }
+
+    /**
+     * The only attribution rule that can reach a sighting made by an iPhone.
+     *
+     * CoreBluetooth never discloses a peripheral's hardware address, so an iOS row's
+     * `radio_identifier` is a UUID scoped to one app install — a value this registry cannot hold and
+     * would be wrong to. What both sides can recognise is the service UUID the tag itself
+     * advertises, which is why `docs/17-identity-and-attribution-policy.md` §4 calls `SERVICE_UUID`
+     * the recommended rule and the only one that works across Android and iOS. Enrolled once, it has
+     * to attribute a sighting whose identifier the Master has never seen.
+     */
+    @Test
+    fun `a service uuid attributes a sighting whose address the master can never know`() = runTest {
+        writeRaw(
+            listOf(
+                peripheralRow(index = 0, serviceUuid = TAG_SERVICE_UUID),
+                peripheralRow(index = 1, serviceUuid = TAG_SERVICE_UUID),
+                // The same peripheral advertising nothing: unjoinable, and it must stay that way.
+                peripheralRow(index = 2, serviceUuid = null),
+            ),
+        )
+        val (name, zip) = exportDay()
+        enrolObserverOnMaster()
+        enrolTagByServiceUuid()
+
+        val commit = importer().commit(importer().preview(name, zip.inputStream()), "AM")
+
+        assertEquals(2, commit.attributed)
+        val stored = master.observationDao().pageForExport(0, Long.MAX_VALUE, "", "", 100)
+        assertEquals(
+            listOf("DEV-TAG", "DEV-TAG", null),
+            stored.sortedBy { it.timestampUtc }.map { it.targetDeviceId },
+        )
+        assertTrue(
+            stored.all { it.radioIdentifier == PERIPHERAL_UUID },
+            "attribution rested on the service UUID; the identifier column is still the UUID " +
+                "iOS reported, which the registry does not contain",
+        )
+    }
+
+    /**
+     * What happens when the Collector and the Master disagree about whose device a row is.
+     *
+     * A Collector stamps `target_device_id` from whatever registry snapshot it happened to hold,
+     * which may be weeks stale or may be another site's. `docs/17` §5 requires the Master to record
+     * its own verdict, keep the Collector's claim in `metadata.collector_claimed_device_id`, and
+     * raise the disagreement rather than resolve it quietly. A silent overwrite would make a stale
+     * claim and a correct one indistinguishable after the fact.
+     */
+    @Test
+    fun `a claim the registry contradicts is overruled, preserved and reported`() = runTest {
+        writeRaw(
+            listOf(
+                // Claims one device; the registry says the service UUID belongs to another.
+                peripheralRow(index = 0, serviceUuid = TAG_SERVICE_UUID, claimed = "DEV-STALE"),
+                // Claims a device the registry has never heard of at all.
+                peripheralRow(index = 1, serviceUuid = null, claimed = "DEV-IMAGINARY"),
+            ),
+        )
+        val (name, zip) = exportDay()
+        enrolObserverOnMaster()
+        enrolTagByServiceUuid()
+
+        val preview = importer().preview(name, zip.inputStream())
+        val reported = preview.preview.issues.filter {
+            it.code == ImportErrorCode.ATTRIBUTION_DISAGREEMENT
+        }
+
+        assertEquals(2, reported.size, "${preview.preview.issues}")
+        assertTrue(
+            reported.all { !it.blocking },
+            "the measurement is real and is stored; only the attribution was in dispute",
+        )
+        assertTrue(preview.canImport)
+
+        importer().commit(preview, "AM")
+        val stored = master.observationDao()
+            .pageForExport(0, Long.MAX_VALUE, "", "", 100)
+            .sortedBy { it.timestampUtc }
+
+        assertEquals("DEV-TAG", stored[0].targetDeviceId, "the Master's verdict is authoritative")
+        assertEquals("DEV-STALE", stored[0].metadata[MetadataKeys.COLLECTOR_CLAIMED_DEVICE_ID])
+
+        assertNull(stored[1].targetDeviceId, "an unverifiable claim is not an attribution")
+        assertEquals("DEV-IMAGINARY", stored[1].metadata[MetadataKeys.COLLECTOR_CLAIMED_DEVICE_ID])
+
+        // The raw measurement is untouched: only the verdict and the preserved claim differ.
+        assertEquals(-58, stored[0].rssi)
     }
 
     @Test
