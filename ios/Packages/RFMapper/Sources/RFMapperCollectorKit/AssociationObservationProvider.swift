@@ -81,14 +81,27 @@ public final class AssociationObservationProvider: ObservationProvider {
 
     private func poll() {
         NEHotspotNetwork.fetchCurrent { [weak self] network in
-            guard let self else { return }
-            guard let network else {
-                // Not joined to Wi-Fi. An ordinary state, not a fault, and not recorded as one: a
-                // degradation per poll while a phone is on cellular would drown the real ones.
-                self.lastBssid = nil
-                return
+            // Hopped to the main queue deliberately. `fetchCurrent` does not document which queue it
+            // calls back on, and every other provider here delivers on the main queue:
+            // `CBCentralManager` is constructed with `queue: .main`, `CLLocationManager` calls its
+            // delegate on the queue it was created on, and the poll timer runs on the main run loop.
+            // That makes "the sink is touched only from the main queue" an invariant of the whole
+            // capture layer, and `CollectionSession` relies on it -- it mutates plain arrays and
+            // counters with no lock, so a second queue appending to `recentObservations` is a
+            // genuine crash rather than a stale read.
+            //
+            // A serial queue inside the session would work too, but would be a lock protecting one
+            // caller, and would leave the UI reading that state across a queue boundary.
+            DispatchQueue.main.async {
+                guard let self else { return }
+                guard let network else {
+                    // Not joined to Wi-Fi. An ordinary state, not a fault, and not recorded as one:
+                    // a degradation per poll while a phone is on cellular would drown the real ones.
+                    self.lastBssid = nil
+                    return
+                }
+                self.record(network)
             }
-            self.record(network)
         }
     }
 
