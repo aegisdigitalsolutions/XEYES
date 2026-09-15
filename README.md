@@ -27,9 +27,13 @@ identifying arbitrary people or devices:
 
 ## Three components
 
+Three roles, on four codebases — the Collector exists for both Android and iOS, and the two are
+held to the same file contract rather than merely to the same intent.
+
 | Component | Path | Role |
 |---|---|---|
 | **Collector** | [`android/collector-app`](android/collector-app) | Field app. `SCAN -> RECORD -> STORE -> EXPORT`. Offline, no server. |
+| **Collector (iOS)** | [`ios`](ios) | The same field app on iOS, within [what the platform permits](docs/06-ios-capability-matrix.md): BLE, association, GPS — never Wi-Fi scanning. [Doc](docs/20-ios-collector.md) |
 | **Master** | [`android/master-app`](android/master-app) | Owner app. Observation database, registries, site model, import, survey, history. |
 | **Positioning Lab** | [`positioning-lab`](positioning-lab) | Python statistical engine. RAW + REFERENCE -> DERIVED estimates. Never mutates RAW. [README](positioning-lab/README.md) |
 
@@ -39,9 +43,10 @@ Nothing shares a process, a database, or a network connection.
 Because nothing shares a process, no test can check those contracts by calling one component from
 another. What can be checked is the artefact: one side writes a file, the file is committed under
 [`contract/`](contract), and the other side's suite reads it. The Kotlin suite writes the site
-model, the device registry and the observation packages; the Lab's suite reads them, runs the
-pipeline and writes the derived package; the Kotlin suite imports that back. A format change that
-breaks a consumer fails a test instead of failing in the field.
+model, the device registry and the observation packages; the Swift suite writes an iOS observation
+package; the Lab's suite reads them, runs the pipeline and writes the derived package; the Kotlin
+suite imports both the iOS package and the derived one back. A format change that breaks a consumer
+fails a test instead of failing in the field.
 
 ## Data layers
 
@@ -69,6 +74,9 @@ android/            Gradle multi-module build
   data-room/          Room entities, DAOs, migrations
   collector-app/      Milestone 1 Collector (Compose)
   master-app/         Milestone 2 Master (Compose)
+ios/                Swift package + SwiftUI Collector + generated Xcode project
+  Packages/RFMapper/  RFMapperCore (model, codecs, export) + RFMapperCollectorKit (capture)
+  RFMapperCollector/  The app; project.yml is the spec the .xcodeproj is generated from
 positioning-lab/    Python package `rfmapper_lab` + CLI + benchmark harness
 ```
 
@@ -89,6 +97,10 @@ cd android && ./gradlew :core-model:test :core-export:test :core-import:test
 # Android apps (requires an Android SDK with platform 35)
 cd android && ./gradlew :collector-app:assembleDebug :master-app:assembleDebug
 
+# iOS core + capture kit. Runs on Linux too, which is the point: the contract tests
+# must not need a Mac. The app itself needs Xcode.
+cd ios/Packages/RFMapper && swift test
+
 # Positioning Lab (see positioning-lab/README.md for the pipeline and the CLI)
 cd positioning-lab && pip install -e '.[dev]' && pytest
 python -m rfmapper_lab.cli demo --out /tmp/rfmapper-demo   # synthetic end-to-end pipeline
@@ -104,7 +116,7 @@ python -m rfmapper_lab.cli demo --out /tmp/rfmapper-demo   # synthetic end-to-en
 | 3 — Survey / site map / fingerprint collection | Survey capture + fingerprint build implemented; interactive map drawing not started |
 | 4 — Positioning Lab inference | Implemented (baselines, fusion, uncertainty, movement, benchmark harness) |
 | 5 — Visualization | Not started |
-| 6 — iOS | Not started (capability matrix delivered) |
+| 6 — iOS | Collector implemented and contract-tested on Linux; **never built or run on Apple hardware** |
 | 7 — Optional future work | Not started |
 
 Accuracy numbers have **not** been measured on this site. The benchmark harness reports numbers for

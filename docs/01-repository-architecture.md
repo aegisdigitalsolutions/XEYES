@@ -52,6 +52,25 @@ code that actually determines data correctness lives in modules with zero Androi
         └────────────────┘       └────────────────┘
 
         positioning-lab/  (Python, separate build, consumes schema/ only)
+
+  ios/  (SwiftPM, separate build, reimplements the contract rather than sharing it)
+
+                     ┌──────────────────┐
+                     │  RFMapperCore    │  mirrors core-model + core-export
+                     │ model, codecs,   │  no Apple framework; builds on Linux
+                     │ manifest, zip    │
+                     └────────┬─────────┘
+                              │
+                  ┌───────────▼───────────┐
+                  │ RFMapperCollectorKit  │  providers, store, session, export
+                  │  CoreBluetooth etc.   │  platform code behind canImport
+                  │  behind canImport     │
+                  └───────────┬───────────┘
+                              │
+                  ┌───────────▼───────────┐
+                  │  RFMapperCollector    │  SwiftUI app; .xcodeproj generated
+                  │      Milestone 6      │  from project.yml
+                  └───────────────────────┘
 ```
 
 ### Dependency rules (enforced in review; violations are build-breaking by construction)
@@ -63,6 +82,8 @@ code that actually determines data correctness lives in modules with zero Androi
 | Only `radio-android` may import `android.net.wifi`, `android.bluetooth`, `android.location` | Single choke point for permission handling and platform quirks |
 | App modules must not implement algorithms | They wire, present, and request permissions |
 | `positioning-lab` must not read an Android database | It consumes export packages, nothing else |
+| `RFMapperCore` must import no Apple framework and must build on Linux | A contract test that needs a Mac is a contract test that stops being run |
+| Apple frameworks appear only inside `#if canImport` in `RFMapperCollectorKit` | Same choke-point principle as `radio-android`, and it is what keeps the capture logic testable without a device |
 
 ## 3. Module responsibilities
 
@@ -135,6 +156,15 @@ The only module allowed to see radio APIs.
 
 ### `collector-app` / `master-app` (android-application)
 Compose UI, ViewModels, DI wiring, foreground service, permission flows, SAF file pickers.
+
+### `RFMapperCore` / `RFMapperCollectorKit` / `RFMapperCollector` (SwiftPM + Xcode)
+`RFMapperCore` is a reimplementation of `core-model` and `core-export` in Swift, not a binding to
+them. That duplication is chosen: sharing the Kotlin code on iOS would mean a runtime, and the thing
+actually worth guaranteeing is not shared code but identical *bytes*, which a contract test can
+check and a shared library cannot. `RFMapperCollectorKit` holds the providers, the store, the
+session and the exporter, with every Apple framework behind `canImport` so the capture logic stays
+testable on Linux. `RFMapperCollector` is SwiftUI and wiring. See
+[`20-ios-collector.md`](20-ios-collector.md).
 
 ## 4. Why a separate Python Positioning Lab rather than on-device math
 
