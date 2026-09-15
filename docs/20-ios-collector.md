@@ -146,3 +146,7 @@ The app has never been built or run on Apple hardware. This repository's CI is L
 The first Xcode build should be treated as the real one. What *is* verified is everything the
 contract depends on: the model, the CSV and JSON encoders, the manifest, the checksums, the zip and
 the observation factory's identity decisions, all tested on Linux and pinned by the fixture above.
+
+[`21-ios-shipping-checklist.md`](21-ios-shipping-checklist.md) is the practical companion to this
+section: what has to happen on a Mac, what has to happen in the Developer portal, and which
+functional gaps remain.
