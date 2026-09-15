@@ -35,6 +35,49 @@ public enum RadioIdentifierNormalizer {
         return groups.map { String(digits[$0]) }.joined(separator: "-")
     }
 
+    /// A Bluetooth service or characteristic UUID, expanded to its full 128-bit form.
+    ///
+    /// Necessary because of an asymmetry that would otherwise discard the only cross-platform join
+    /// key iOS has. Bluetooth SIG-assigned UUIDs are 16- or 32-bit shorthands for a value in the
+    /// Bluetooth Base UUID range, and `CBUUID.uuidString` hands back the shorthand: a heart-rate
+    /// service is `"180D"`, not `"0000180d-0000-1000-8000-00805f9b34fb"`. Android's
+    /// `ParcelUuid.toString()` always returns the 128-bit form. Passing the shorthand to ``uuid(_:)``
+    /// yields nil -- it is four hex digits, not thirty-two -- so an iOS sighting of a tag
+    /// advertising a standard service would record no service UUID at all and become unjoinable to
+    /// the Android sighting of the same hardware, which is the one thing
+    /// `docs/06-ios-capability-matrix.md` §3 says must keep working.
+    ///
+    /// Already-128-bit input is normalized by ``uuid(_:)`` unchanged.
+    public static func bluetoothUuid(_ raw: String) -> String? {
+        // A `0x` prefix is stripped before anything counts digits. Shorthands are written both ways
+        // -- `180D` and `0x180D` -- and the `0` of the prefix would otherwise be counted as a hex
+        // digit, turning a valid shorthand into a five-digit string that matches nothing. This
+        // matters because operator-entered UUIDs reach this function, not just CoreBluetooth's.
+        var text = raw.trimmingASCIIWhitespace()
+        if text.count > 2, text.lowercased().hasPrefix("0x") {
+            text = String(text.dropFirst(2))
+        }
+
+        let hex = text.lowercased().filter { $0.isLowercaseHexDigit }
+        guard hex.count == text.count else {
+            // Separators are legal in the 128-bit form and nowhere else, so anything with stray
+            // characters is only worth trying as a full UUID.
+            return uuid(text)
+        }
+        switch hex.count {
+        case 4:
+            return uuid("0000\(hex)\(Self.bluetoothBaseSuffix)")
+        case 8:
+            return uuid("\(hex)\(Self.bluetoothBaseSuffix)")
+        default:
+            return uuid(text)
+        }
+    }
+
+    /// Everything after the first 32 bits of the Bluetooth Base UUID,
+    /// `00000000-0000-1000-8000-00805F9B34FB`.
+    private static let bluetoothBaseSuffix = "0000" + "1000" + "8000" + "00805f9b34fb"
+
     /// An iOS peripheral identifier, which is a UUID but *not* an address.
     ///
     /// Normalized identically to any other UUID so the column stays uniform. What distinguishes it

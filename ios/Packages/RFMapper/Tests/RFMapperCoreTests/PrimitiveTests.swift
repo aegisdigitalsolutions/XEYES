@@ -193,6 +193,44 @@ final class DecimalCellTests: XCTestCase {
     }
 }
 
+final class RadioIdentifierNormalizerTests: XCTestCase {
+
+    func testMacSeparatorsAndCaseAreCollapsed() {
+        XCTAssertEqual(RadioIdentifierNormalizer.mac("AA-BB-CC-00-00-01"), "aa:bb:cc:00:00:01")
+        XCTAssertEqual(RadioIdentifierNormalizer.mac("aabbcc000001"), "aa:bb:cc:00:00:01")
+        XCTAssertNil(RadioIdentifierNormalizer.mac("aa:bb:cc:00:00"))
+        XCTAssertNil(RadioIdentifierNormalizer.mac("not a mac"))
+    }
+
+    /// The asymmetry that would otherwise throw away iOS's only cross-platform join key.
+    ///
+    /// `CBUUID.uuidString` returns `"180D"` for the heart-rate service where Android returns the
+    /// full 128-bit form. Both must normalize to the same string or the same tag sighted by an
+    /// iPhone and by a Pixel becomes two unrelated radios.
+    func testShortBluetoothUuidsExpandToWhatAndroidReports() {
+        let heartRate = "0000180d-0000-1000-8000-00805f9b34fb"
+        XCTAssertEqual(RadioIdentifierNormalizer.bluetoothUuid("180D"), heartRate)
+        XCTAssertEqual(RadioIdentifierNormalizer.bluetoothUuid("0x180D"), heartRate)
+        XCTAssertEqual(RadioIdentifierNormalizer.bluetoothUuid("0000180D"), heartRate)
+        XCTAssertEqual(RadioIdentifierNormalizer.bluetoothUuid(heartRate.uppercased()), heartRate)
+
+        // A vendor's own 128-bit UUID is left alone apart from case and separators.
+        let vendor = "6b1a7e10-3c4d-4f5a-9b8c-1d2e3f405162"
+        XCTAssertEqual(RadioIdentifierNormalizer.bluetoothUuid(vendor.uppercased()), vendor)
+
+        // Lengths that are neither a shorthand nor a UUID are refused rather than padded into one.
+        XCTAssertNil(RadioIdentifierNormalizer.bluetoothUuid("18"))
+        XCTAssertNil(RadioIdentifierNormalizer.bluetoothUuid("180D0"))
+        XCTAssertNil(RadioIdentifierNormalizer.bluetoothUuid(""))
+    }
+
+    func testAnSsidIsNotNormalizedBecauseItIsNotAnIdentity() {
+        // Case and trailing whitespace are legitimate parts of a network name.
+        XCTAssertEqual(RadioIdentifierNormalizer.ssid("Guest WiFi "), "Guest WiFi ")
+        XCTAssertNil(RadioIdentifierNormalizer.ssid(""))
+    }
+}
+
 final class CsvDialectTests: XCTestCase {
 
     func testQuotingOnlyWhenRequired() {

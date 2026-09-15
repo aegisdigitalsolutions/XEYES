@@ -79,7 +79,7 @@ public struct ObservationFactory {
             // All of them, sorted, so a device advertising several is not reduced to whichever one
             // happened to be first in the advertisement.
             metadata[MetadataKeys.bleServiceUuids] = serviceUuids
-                .compactMap(RadioIdentifierNormalizer.uuid)
+                .compactMap(RadioIdentifierNormalizer.bluetoothUuid)
                 .sorted()
                 .joined(separator: ",")
         }
@@ -100,7 +100,9 @@ public struct ObservationFactory {
             targetDeviceId: targetDeviceId,
             radioIdentifier: normalized,
             identifierType: .other,
-            bleServiceUuid: serviceUuids.first.flatMap(RadioIdentifierNormalizer.uuid),
+            // Expanded, not merely normalized: CoreBluetooth reports a SIG-assigned service as a
+            // 16-bit shorthand, and only the 128-bit form matches what Android records.
+            bleServiceUuid: serviceUuids.first.flatMap(RadioIdentifierNormalizer.bluetoothUuid),
             manufacturerData: manufacturerData.flatMap(RadioIdentifierNormalizer.manufacturerData),
             rssi: rssi,
             txPower: txPower,

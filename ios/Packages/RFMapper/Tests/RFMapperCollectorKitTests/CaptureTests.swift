@@ -109,6 +109,29 @@ final class ObservationFactoryTests: XCTestCase {
         )
     }
 
+    /// A tag advertising a SIG-assigned service must stay joinable to the Android sighting of it.
+    ///
+    /// CoreBluetooth hands back `"180D"` where Android hands back the 128-bit form. If the capture
+    /// path stored the shorthand, or dropped it for not being a UUID, the service UUID column would
+    /// be empty for exactly the devices whose service UUID is most standard -- and the service UUID
+    /// is the only key by which an iOS sighting can be joined to anything at all
+    /// (`docs/06-ios-capability-matrix.md` §3).
+    func testAStandardServiceUuidIsRecordedInTheFormAndroidWouldRecord() throws {
+        let observation = try fixedFactory().ble(
+            peripheralIdentifier: "9F8E7D6C-5B4A-4392-8281-706F5E4D3C2B",
+            rssi: -60,
+            serviceUuids: ["180D"],
+            sessionId: "session-1",
+            confidence: 0.9
+        )
+
+        XCTAssertEqual(observation.bleServiceUuid, "0000180d-0000-1000-8000-00805f9b34fb")
+        XCTAssertEqual(
+            observation.metadata[MetadataKeys.bleServiceUuids],
+            "0000180d-0000-1000-8000-00805f9b34fb"
+        )
+    }
+
     /// The iOS Wi-Fi row, and the reason the Lab had to change to accept it.
     func testAnAssociationCarriesABssidAndDeliberatelyNoRssi() throws {
         let observation = try fixedFactory().association(
